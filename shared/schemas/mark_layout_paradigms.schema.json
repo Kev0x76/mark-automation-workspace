@@ -1,0 +1,339 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mark-automation.local/schemas/mark_layout_paradigms.schema.json",
+  "title": "docs/mark-layout-paradigms/registry.json",
+  "description": "Machine-readable registry of shipping-mark layout paradigms: what factory reference marks do (measured) and what the owner arranged on the calibration bench (owner_calibration samples). Every paradigm must cite face or page observations; the evidence status and every proportion that names a source field are recomputed from those observations by apps/mark_generator/tools/paradigm_registry.py validate, so a card cannot claim more than its evidence shows. The narrative, first principles and maintenance rules live in the authority doc.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "registry_id",
+    "authority_doc",
+    "last_updated",
+    "aspect_definition",
+    "samples",
+    "paradigms"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "registry_id": {
+      "type": "string",
+      "const": "kmt-mark-layout-paradigms"
+    },
+    "authority_doc": {
+      "type": "string",
+      "description": "Repo-relative path of the narrative authority document. Every paradigm id must appear in it."
+    },
+    "last_updated": {
+      "$ref": "#/$defs/date"
+    },
+    "aspect_definition": {
+      "type": "string"
+    },
+    "samples": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/sample"
+      }
+    },
+    "paradigms": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/paradigm"
+      }
+    }
+  },
+  "$defs": {
+    "date": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "obs_id": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9]*-p\\d{2}(-r\\d+)?(-(front|side))?$"
+    },
+    "sample": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "owner_label",
+        "files",
+        "carrier",
+        "face_mm_basis",
+        "observations",
+        "added"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9]*$",
+          "description": "Prefix of every obs_id measured on this sample."
+        },
+        "owner_label": {
+          "type": "string",
+          "description": "What the owner called it (the folder name under 唛头排版/), verbatim."
+        },
+        "files": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "sha256",
+              "bytes"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "Repo-relative. 唛头排版/ is git-ignored, so the hash is what pins the measured file."
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "bytes": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        },
+        "carrier": {
+          "type": "string",
+          "enum": [
+            "vector_text_and_outline",
+            "vector_outline",
+            "raster_screenshot",
+            "photo",
+            "mixed",
+            "owner_calibration"
+          ]
+        },
+        "face_mm_basis": {
+          "type": "string",
+          "enum": [
+            "printed_dimension_text",
+            "verified_1to1",
+            "ocr_carton_size",
+            "declared_carton",
+            "none"
+          ],
+          "description": "How face millimetres were established. 'declared_carton' = the carton was given (owner calibration bench). 'none' means the sample is structure evidence only."
+        },
+        "observations": {
+          "type": "string",
+          "description": "Repo-relative path of this sample's observations file."
+        },
+        "added": {
+          "$ref": "#/$defs/date"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "paradigm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "scope",
+        "kind",
+        "statement",
+        "evidence",
+        "evidence_status",
+        "owner_status",
+        "engine",
+        "why",
+        "added",
+        "updated"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(PAGE|FRONT|SIDE|PAIR)-[A-Z0-9]+(-[A-Z0-9]+)*$",
+          "description": "Stable and never reused. The prefix must match scope."
+        },
+        "title": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "page",
+            "front",
+            "side",
+            "pair"
+          ]
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "page",
+            "structure",
+            "proportion",
+            "migration"
+          ]
+        },
+        "statement": {
+          "type": "string",
+          "description": "What the evidence shows (factory practice and/or the owner's own arrangement), in one or two sentences. Facts only."
+        },
+        "structure": {
+          "type": "string",
+          "description": "Element arrangement in the observations' vocabulary, when kind is structure or migration."
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/obs_id"
+          }
+        },
+        "counter_evidence": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/obs_id"
+          },
+          "description": "Faces inside or next to the domain where the factory did something else. They are what keeps a paradigm from being read as a rule."
+        },
+        "proportions": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/proportion"
+          }
+        },
+        "evidence_status": {
+          "type": "string",
+          "enum": [
+            "multi_source",
+            "single_source"
+          ],
+          "description": "Recomputed by the validator from the distinct samples behind the evidence; a mismatch fails validation."
+        },
+        "owner_status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "approved",
+            "rejected"
+          ],
+          "description": "Owner (负责人) decision on adopting it. Agents never set approved/rejected without a quotable owner decision in owner_ref."
+        },
+        "owner_ref": {
+          "type": "string"
+        },
+        "engine": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "note"
+          ],
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": [
+                "implemented",
+                "partial",
+                "absent",
+                "conflicts",
+                "n/a"
+              ]
+            },
+            "families": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "note": {
+              "type": "string"
+            }
+          }
+        },
+        "why": {
+          "type": "string",
+          "description": "First-principles reading. Tag each clause [事实] (measured or in the engine policy) or [推理] (reasoning not yet tested)."
+        },
+        "open": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "added": {
+          "$ref": "#/$defs/date"
+        },
+        "updated": {
+          "$ref": "#/$defs/date"
+        },
+        "figures": {
+          "type": "array",
+          "description": "Reference images the owner designated for this paradigm (effect pictures). The validator fails if a path does not exist.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "caption",
+              "source"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "Repo-relative, under docs/assets/."
+              },
+              "caption": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string",
+                "description": "Who designated it and when, and what file it shows."
+              }
+            }
+          }
+        }
+      }
+    },
+    "proportion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observed",
+        "unit"
+      ],
+      "properties": {
+        "observed": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number"
+          }
+        },
+        "unit": {
+          "type": "string"
+        },
+        "from_field": {
+          "type": "string",
+          "description": "Face field the range is recomputed from over the evidence faces (e.g. item_bar_w_frac). When set, the validator fails if observed differs from the recomputed min/max by more than 0.002."
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

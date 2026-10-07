@@ -1,0 +1,306 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mark-automation.local/schemas/manifest.schema.json",
+  "title": "manifest.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "project_id",
+    "created_at",
+    "updated_at",
+    "template_mode",
+    "production_ready",
+    "needs_v5_check",
+    "status",
+    "directories",
+    "inputs",
+    "data",
+    "extracted",
+    "linearts",
+    "generated",
+    "reports"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "template_mode": {
+      "type": "string",
+      "enum": ["kmt_style_v1", "kmt_style_v1_minimal", "kmt_style_v1_adaptive"]
+    },
+    "production_ready": { "type": "boolean" },
+    "needs_v5_check": { "type": "boolean" },
+    "status": {
+      "type": "string",
+      "enum": [
+        "extracted",
+        "product_regions",
+        "lineart_pending",
+        "lineart_ready",
+        "preview_generated",
+        "generated",
+        "verification_pending",
+        "verified",
+        "verified_pass",
+        "verified_failed",
+        "generated_unverified",
+        "needs_review",
+        "failed"
+      ]
+    },
+    "template": {
+      "anyOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/template" }
+      ]
+    },
+    "tools": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "generator": { "$ref": "#/$defs/tool" },
+        "checker": { "$ref": "#/$defs/tool" }
+      }
+    },
+    "directories": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "project_root",
+        "input",
+        "data",
+        "extracted",
+        "linearts",
+        "lineart_candidates",
+        "lineart_approved",
+        "generated",
+        "reports"
+      ],
+      "properties": {
+        "project_root": { "$ref": "#/$defs/project_relative_path" },
+        "input": { "$ref": "#/$defs/project_relative_path" },
+        "data": { "$ref": "#/$defs/project_relative_path" },
+        "extracted": { "$ref": "#/$defs/project_relative_path" },
+        "product_regions": { "$ref": "#/$defs/project_relative_path" },
+        "linearts": { "$ref": "#/$defs/project_relative_path" },
+        "lineart_candidates": { "$ref": "#/$defs/project_relative_path" },
+        "lineart_approved": { "$ref": "#/$defs/project_relative_path" },
+        "generated": { "$ref": "#/$defs/project_relative_path" },
+        "reports": { "$ref": "#/$defs/project_relative_path" }
+      }
+    },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract"],
+      "properties": {
+        "contract": { "$ref": "#/$defs/artifact" }
+      }
+    },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items_normalized"],
+      "properties": {
+        "items_normalized": { "$ref": "#/$defs/artifact" },
+        "contract_snapshot": { "$ref": "#/$defs/artifact" }
+      }
+    },
+    "extracted": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["product_images_dir"],
+      "properties": {
+        "product_images_dir": { "$ref": "#/$defs/artifact" },
+        "product_regions_dir": { "$ref": "#/$defs/artifact_or_null" }
+      }
+    },
+    "linearts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidates_dir", "approved_dir", "lineart_report"],
+      "properties": {
+        "candidates_dir": { "$ref": "#/$defs/artifact" },
+        "approved_dir": { "$ref": "#/$defs/artifact" },
+        "lineart_report": { "$ref": "#/$defs/artifact_or_null" }
+      }
+    },
+    "generated": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["preview_pdf", "standard_mark_pdf"],
+      "properties": {
+        "preview_pdf": { "$ref": "#/$defs/artifact_or_null" },
+        "standard_mark_pdf": { "$ref": "#/$defs/artifact_or_null" }
+      }
+    },
+    "reports": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "extraction_report",
+        "unmatched_images",
+        "generation_report",
+        "verification_report",
+        "verification_summary_csv"
+      ],
+      "properties": {
+        "extraction_report": { "$ref": "#/$defs/artifact_or_null" },
+        "unmatched_images": { "$ref": "#/$defs/artifact_or_null" },
+        "product_regions": { "$ref": "#/$defs/artifact_or_null" },
+        "product_region_job": { "$ref": "#/$defs/artifact" },
+        "lineart_groups": { "$ref": "#/$defs/artifact" },
+        "lineart_group_approvals": { "$ref": "#/$defs/artifact" },
+        "verification_manual_release": { "$ref": "#/$defs/artifact" },
+        "generation_report": { "$ref": "#/$defs/artifact_or_null" },
+        "verification_report": { "$ref": "#/$defs/artifact_or_null" },
+        "verification_summary_csv": { "$ref": "#/$defs/artifact_or_null" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/issue" },
+      "default": []
+    },
+    "errors": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/issue" },
+      "default": []
+    },
+    "verification": { "type": "object" }
+  },
+  "$defs": {
+    "project_relative_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_or_null": {
+      "anyOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/artifact" }
+      ]
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "status"],
+      "properties": {
+        "path": { "$ref": "#/$defs/project_relative_path" },
+        "status": {
+          "type": "string",
+          "enum": ["expected", "present", "generated", "missing", "skipped", "failed"]
+        },
+        "media_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{64}$"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": { "type": "string" },
+        "url": { "type": "string" }
+      }
+    },
+    "template": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "const": "kmt_style_v1"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "issue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "severity", "message"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["info", "warning", "error", "needs_review"]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "item_no": { "type": "string" },
+        "field": { "type": "string" },
+        "path": { "type": "string" },
+        "face": {
+          "type": "string",
+          "enum": ["front", "side"]
+        },
+        "component": { "type": "string" },
+        "components": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "sheet": { "type": "string" },
+        "row": { "type": "integer" },
+        "x_dimension_mm": { "type": "number" },
+        "magnification": { "type": "number" },
+        "size_mm": { "type": "number" },
+        "needed_mm": { "type": "number" },
+        "available_mm": { "type": "number" },
+        "box_mm": {
+          "type": "array",
+          "items": { "type": "number" }
+        },
+        "zone_mm": {
+          "type": "array",
+          "items": { "type": "number" }
+        },
+        "safe_area_mm": {
+          "type": "array",
+          "items": { "type": "number" }
+        },
+        "rejected_family": { "type": "string" },
+        "aspect": { "type": "number" }
+      }
+    }
+  }
+}

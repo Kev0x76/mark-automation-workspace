@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kmtstyle.local/schemas/lineart_prompt.schema.json",
+  "title": "Project lineart prompt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "project_id",
+    "prompt_instruction",
+    "updated_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "prompt_instruction": {
+      "type": "string",
+      "maxLength": 180
+    },
+    "updated_at": {
+      "type": ["string", "null"]
+    }
+  }
+}

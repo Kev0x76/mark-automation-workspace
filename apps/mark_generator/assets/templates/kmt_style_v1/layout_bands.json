@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "kmt_style_v1_layout_bands_v1",
+  "provenance": {
+    "measured_with": "app.services.layout_audit.raster at zoom 4 (288 DPI), 4 px cells",
+    "sources": [
+      {
+        "file": "世荣.pdf",
+        "panels": 38,
+        "method": "carton_text"
+      }
+    ],
+    "band_rule": "full observed min-to-max per metric",
+    "reproduces": "front ink median 0.325, largest empty rectangle median 0.064 / max 0.095; side 0.345 and 0.058 / 0.152 - the figures published in docs/carton-adaptive-layout-implementation-20260729.md",
+    "not_owner_approved": "Bands describe what these factory panels do. Whether being outside one should ever block a release is an owner decision; the checker only warns.",
+    "coverage_gap": "Only sources whose panel rectangles can be established without guessing are included. The mark frame is an owner-defined boundary (2026-08-27), so the remaining factory files need a human to mark theirs before they can join."
+  },
+  "bands": {
+    "front": {
+      "balance": {
+        "low": 0.10216,
+        "high": 0.19622,
+        "p10": 0.13896,
+        "median": 0.17538,
+        "p90": 0.19082,
+        "n": 19
+      },
+      "ink_coverage": {
+        "low": 0.29031,
+        "high": 0.41712,
+        "p10": 0.29484,
+        "median": 0.32543,
+        "p90": 0.34538,
+        "n": 19
+      },
+      "largest_empty_rect": {
+        "low": 0.04048,
+        "high": 0.09509,
+        "p10": 0.05077,
+        "median": 0.06396,
+        "p90": 0.08458,
+        "n": 19
+      },
+      "spread": {
+        "low": 0.855,
+        "high": 0.97871,
+        "p10": 0.87582,
+        "median": 0.94151,
+        "p90": 0.97636,
+        "n": 19
+      }
+    },
+    "side": {
+      "balance": {
+        "low": 0.11231,
+        "high": 0.19622,
+        "p10": 0.116,
+        "median": 0.14168,
+        "p90": 0.17511,
+        "n": 19
+      },
+      "ink_coverage": {
+        "low": 0.30237,
+        "high": 0.42256,
+        "p10": 0.31145,
+        "median": 0.34547,
+        "p90": 0.41175,
+        "n": 19
+      },
+      "largest_empty_rect": {
+        "low": 0.03334,
+        "high": 0.15167,
+        "p10": 0.04569,
+        "median": 0.05802,
+        "p90": 0.09355,
+        "n": 19
+      },
+      "spread": {
+        "low": 0.855,
+        "high": 0.98717,
+        "p10": 0.87839,
+        "median": 0.929,
+        "p90": 0.97173,
+        "n": 19
+      }
+    }
+  }
+}

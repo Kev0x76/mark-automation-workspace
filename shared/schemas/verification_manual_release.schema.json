@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mark-automation.local/schemas/verification_manual_release.schema.json",
+  "title": "verification_manual_release.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "project_id",
+    "status",
+    "release_id",
+    "released_at",
+    "reviewer",
+    "reason",
+    "verification_run_id",
+    "verification_status",
+    "issue_fingerprint",
+    "confirmed_issue_ids",
+    "confirmed_issues",
+    "input_hashes",
+    "evidence_hashes"
+  ],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.1.0" },
+    "project_id": { "type": "string", "minLength": 1 },
+    "status": { "type": "string", "const": "released" },
+    "release_id": { "type": "string", "pattern": "^[0-9a-f]{32}$" },
+    "released_at": { "type": "string", "format": "date-time" },
+    "reviewer": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "reason": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "verification_run_id": { "type": "string", "minLength": 1 },
+    "verification_status": { "type": "string", "const": "verified_failed" },
+    "issue_fingerprint": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "confirmed_issue_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[0-9a-f]{16}$" }
+    },
+    "confirmed_issues": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/issue" }
+    },
+    "input_hashes": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "anyOf": [
+          { "type": "string", "minLength": 1 },
+          { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+        ]
+      }
+    },
+    "evidence_hashes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["verification_report", "verification_run_tree"],
+      "properties": {
+        "verification_report": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "verification_run_tree": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    }
+  },
+  "$defs": {
+    "issue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["issue_id", "item_number", "field", "status", "contract_value", "mark_value", "note"],
+      "properties": {
+        "issue_id": { "type": "string", "pattern": "^[0-9a-f]{16}$" },
+        "item_number": { "type": "string" },
+        "field": { "type": "string", "minLength": 1 },
+        "status": { "type": "string", "minLength": 1 },
+        "contract_value": { "type": "string" },
+        "mark_value": { "type": "string" },
+        "note": { "type": "string" }
+      }
+    }
+  }
+}

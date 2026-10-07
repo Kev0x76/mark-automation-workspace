@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3ece2">
+  <title>唛头自动化生成工具</title>
+  <link rel="stylesheet" href="/assets/styles.css?v=workbench28">
+</head>
+<body>
+  <div class="studio-shell">
+    <header class="studio-header">
+      <div class="brand-lockup">
+        <img src="/assets/brand-stamp.webp?v=workbench28" width="52" height="52" alt="唛头自动化生成工具标志">
+        <div>
+          <strong>唛头自动化生成工具</strong>
+          <span>内部运输标识生产系统</span>
+        </div>
+      </div>
+
+      <div class="project-title-block">
+        <span class="micro-label">当前项目</span>
+        <h1 id="project-display-name">尚未打开项目</h1>
+        <p id="project-subtitle">上传合同后，项目名称与最终 PDF 使用同一合同名称基准。</p>
+      </div>
+
+      <div class="header-actions">
+        <span class="service-pill" id="service-pill" data-state="loading">服务检查中</span>
+        <button class="button button-soft" id="open-provider-settings" type="button">模型与密钥</button>
+        <button class="button button-soft" id="open-project" type="button">打开项目</button>
+        <button class="button button-primary" id="open-contract" type="button">新建项目</button>
+      </div>
+    </header>
+
+    <nav class="workspace-tabs" aria-label="生产工作区">
+      <button class="workspace-tab active" type="button" data-workspace="contract">
+        <span class="tab-number">01</span>
+        <span><strong>合同</strong><small id="tab-contract-note">上传与解析</small></span>
+      </button>
+      <button class="workspace-tab" type="button" data-workspace="lineart">
+        <span class="tab-number">02</span>
+        <span><strong>线稿</strong><small id="tab-lineart-note">产品区域与共享</small></span>
+      </button>
+      <button class="workspace-tab" type="button" data-workspace="mark">
+        <span class="tab-number">03</span>
+        <span><strong>唛头</strong><small id="tab-mark-note">正式产物</small></span>
+      </button>
+      <button class="workspace-tab" type="button" data-workspace="verify">
+        <span class="tab-number">04</span>
+        <span><strong>核对与交付</strong><small id="tab-verify-note">独立证据门禁</small></span>
+      </button>
+    </nav>
+
+    <div class="notice-bar hidden" id="notice-bar" role="alert">
+      <div><strong id="notice-title"></strong><span id="notice-copy"></span></div>
+      <button class="text-button" id="notice-close" type="button">关闭</button>
+    </div>
+
+    <div class="studio-grid">
+      <aside class="context-rail">
+        <section class="rail-card contract-card">
+          <div class="rail-card-heading">
+            <span class="micro-label">合同文件</span>
+            <span class="status-dot" id="contract-state-dot"></span>
+          </div>
+          <div class="contract-paper" id="contract-paper">
+            <span class="contract-file-type">XLS</span>
+            <strong id="contract-file-name">等待上传合同</strong>
+            <small id="contract-file-meta">支持 .xls / .xlsx</small>
+          </div>
+          <dl class="contract-facts">
+            <div><dt>工作表</dt><dd id="contract-sheet">—</dd></div>
+            <div><dt>货号</dt><dd id="contract-item-count">—</dd></div>
+            <div><dt>产品图</dt><dd id="contract-image-count">—</dd></div>
+            <div><dt>交付文件</dt><dd id="contract-delivery-name">—</dd></div>
+          </dl>
+        </section>
+
+        <section class="rail-card browser-card">
+          <div class="rail-card-heading">
+            <div>
+              <span class="micro-label">两级浏览</span>
+              <strong>类别 / 序号</strong>
+            </div>
+            <span class="count-chip" id="visible-item-count">0</span>
+          </div>
+          <div class="segmented-control" role="group" aria-label="货号分组方式">
+            <button class="active" id="group-by-category" type="button">按类别</button>
+            <button id="group-by-sequence" type="button">按序号</button>
+          </div>
+          <button class="rail-action-button" id="open-create-group" type="button" disabled>手动选择货号建类别</button>
+          <label class="search-field">
+            <span class="sr-only">搜索货号或中文品名</span>
+            <input id="item-search" type="search" placeholder="搜索货号或中文品名" autocomplete="off">
+          </label>
+          <div class="group-tree" id="group-tree">
+            <div class="empty-inline">打开项目后显示类别和货号。</div>
+          </div>
+        </section>
+      </aside>
+
+      <main class="workspace-stage">
+        <section class="workspace-view active" data-view="contract">
+          <div class="view-heading coral-heading">
+            <div>
+              <span class="micro-label">CONTRACT INTAKE</span>
+              <h2>合同快速摄取</h2>
+              <p>先读取合同事实和产品图，再把耗时的产品区域处理放到后台逐货号执行。</p>
+            </div>
+            <button class="button button-primary" id="contract-primary-action" type="button">上传合同</button>
+          </div>
+
+          <div class="contract-workspace-grid">
+            <article class="paper-panel upload-panel">
+              <span class="panel-kicker">输入</span>
+              <h3>原始采购合同</h3>
+              <p>系统只摄取一次合同事实，并冻结为可校验的 contract snapshot。</p>
+              <button class="contract-dropzone" id="contract-dropzone" type="button">
+                <strong>拖入合同，或点击选择文件</strong>
+                <span>.xls / .xlsx，最大 100 MB</span>
+              </button>
+              <input id="quick-contract-input" type="file" accept=".xls,.xlsx" hidden>
+            </article>
+
+            <article class="paper-panel progress-panel" id="ingestion-progress-card">
+              <div class="panel-title-row">
+                <div><span class="panel-kicker">实时进度</span><h3 id="progress-title">等待合同</h3></div>
+                <span class="status-badge neutral" id="progress-status">未开始</span>
+              </div>
+              <div class="progress-visual" aria-hidden="true">
+                <span class="progress-fill" id="progress-fill"></span>
+              </div>
+              <div class="progress-copy">
+                <strong id="progress-primary">上传合同后显示真实处理阶段</strong>
+                <span id="progress-secondary">不会把合同读取和产品区域处理混成一个虚假百分比。</span>
+              </div>
+              <ol class="progress-steps" id="progress-steps">
+                <li data-progress-step="contract"><span></span><strong>合同事实</strong><small>等待</small></li>
+                <li data-progress-step="images"><span></span><strong>产品图片</strong><small>等待</small></li>
+                <li data-progress-step="regions"><span></span><strong>产品区域</strong><small>等待</small></li>
+                <li data-progress-step="ready"><span></span><strong>进入线稿</strong><small>等待</small></li>
+              </ol>
+            </article>
+          </div>
+
+          <article class="paper-panel contract-result-panel">
+            <div class="panel-title-row">
+              <div><span class="panel-kicker">解析结果</span><h3>合同结构与货号</h3></div>
+              <span class="panel-meta" id="contract-parser-meta">等待项目</span>
+            </div>
+            <div class="contract-summary-grid">
+              <div><span>合同货号</span><strong id="summary-total-items">—</strong><small>规范化字段</small></div>
+              <div><span>匹配产品图</span><strong id="summary-matched-images">—</strong><small>销售图不会直接入版</small></div>
+              <div><span>表头位置</span><strong id="summary-header-row">—</strong><small id="summary-header-note">失败时停止猜测</small></div>
+              <div><span>下一步</span><strong id="summary-next-action">上传合同</strong><small>来自真实 readiness</small></div>
+            </div>
+            <div class="contract-items" id="contract-items">
+              <div class="empty-inline">解析成功后显示全部货号、条码、四国品名和装箱数。</div>
+            </div>
+          </article>
+        </section>
+
+        <section class="workspace-view" data-view="lineart">
+          <div class="view-heading teal-heading">
+            <div>
+              <span class="micro-label">LINEART STUDIO</span>
+              <h2 id="lineart-view-title">产品区域与线稿</h2>
+              <p id="lineart-view-copy">选择类别或货号，查看产品图、选区和入版线稿的完整关系。</p>
+            </div>
+            <div class="heading-actions">
+              <button class="button button-soft" id="generate-regions" type="button" disabled>处理产品区域</button>
+              <button class="button button-primary" id="generate-linearts" type="button" disabled>批量生成缺失线稿</button>
+            </div>
+          </div>
+
+          <div class="region-job-banner hidden" id="region-job-banner">
+            <div><strong id="region-job-title">后台处理产品区域</strong><span id="region-job-copy">—</span></div>
+            <div class="compact-progress"><span id="region-job-fill"></span></div>
+          </div>
+          <div class="region-job-banner lineart-job-banner hidden" id="lineart-job-banner">
+            <div><strong id="lineart-job-title">后台生成缺失线稿</strong><span id="lineart-job-copy">—</span></div>
+            <div class="compact-progress"><span id="lineart-job-fill"></span></div>
+          </div>
+          <div class="lineart-batch-options paper-panel">
+            <label class="check-field" id="lineart-strategy-group"><input id="lineart-strategy-reps" type="checkbox" checked><span>优先按类别只生成代表货号（少调用 API；生成后需确认同形再共享）</span></label>
+            <div class="pending-share-bar hidden" id="pending-share-bar">
+              <div><strong id="pending-share-title">有类别可共享</strong><span id="pending-share-copy">—</span></div>
+              <div class="pending-share-actions">
+                <button class="button button-soft" id="generate-remaining-without-share" type="button">不共享，单独生成其余</button>
+                <button class="button button-teal" id="open-pending-share" type="button">确认同形并共享</button>
+              </div>
+            </div>
+          </div>
+
+          <article class="paper-panel project-prompt-panel">
+            <div>
+              <span class="panel-kicker">项目统一线稿要求</span>
+              <h3>一次设置，当前项目所有后续生成都会使用</h3>
+              <p>批量生成和单货号生成都会自动继承；只影响之后的生成，不重做已经批准的线稿。</p>
+            </div>
+            <label class="form-field"><span>项目统一提示词</span><input id="project-lineart-prompt" type="text" maxlength="180" placeholder="例如：去掉红色尺寸标注，保留产品主体"></label>
+            <div class="project-prompt-actions">
+              <span id="project-prompt-status">尚未设置</span>
+              <button class="button button-primary" id="save-project-lineart-prompt" type="button" disabled>保存项目要求</button>
+            </div>
+          </article>
+
+          <article class="paper-panel lineart-item-browser">
+            <div class="panel-title-row">
+              <div><span class="panel-kicker">中央货号浏览</span><h3>无需先点类别，直接选择货号</h3></div>
+              <span class="panel-meta" id="lineart-item-summary">等待项目</span>
+            </div>
+            <label class="center-search-field">
+              <span class="sr-only">在线稿工作区搜索货号或中文品名</span>
+              <input id="lineart-item-search" type="search" placeholder="搜索货号或中文品名；无类别合同也可直接浏览" autocomplete="off">
+            </label>
+            <div class="lineart-item-grid" id="lineart-item-grid">
+              <div class="empty-inline">打开项目后显示全部货号。</div>
+            </div>
+          </article>
+
+          <div class="artifact-chain">
+            <article class="artifact-card source-card">
+              <div class="artifact-head"><span>01</span><strong>产品图片</strong><small id="source-image-state">—</small></div>
+              <button class="asset-frame" id="source-image-button" type="button" disabled>
+                <img class="hidden" id="source-image" alt="合同产品图片">
+                <span id="source-image-empty">暂无产品图片</span>
+              </button>
+              <div class="artifact-card-actions">
+
+                <span>默认使用自动选区；仅在识别错误时人工框选，不会改动合同原图。</span>
+              </div>
+            </article>
+
+            <article class="artifact-card region-card">
+              <div class="artifact-head"><span>02</span><strong>产品区域</strong><small id="region-image-state">—</small></div>
+              <button class="asset-frame" id="region-image-button" type="button" disabled>
+                <img class="hidden" id="region-image" alt="选中的产品区域">
+                <span id="region-image-empty">等待后台识别</span>
+              </button>
+              <div class="region-candidates" id="region-candidates">
+                <div class="empty-inline">系统会自动采用最高分区域；如不合适，点选其他候选。</div>
+              </div>
+            </article>
+
+            <article class="artifact-card lineart-card">
+              <div class="artifact-head"><span>03</span><strong>入版线稿</strong><small id="lineart-image-state">—</small></div>
+              <button class="asset-frame lineart-frame" id="lineart-image-button" type="button" disabled>
+                <img class="hidden" id="lineart-image" alt="批准的入版线稿">
+                <span id="lineart-image-empty">无线稿站位，请人工添加</span>
+              </button>
+            </article>
+          </div>
+
+          <article class="paper-panel selected-item-panel">
+            <div class="selected-item-copy">
+              <span class="item-number-label" id="selected-item-number">未选择货号</span>
+              <h3 id="selected-item-name">从左侧选择一个货号</h3>
+              <p id="selected-item-meta">这里会显示条码、装箱数、产品区域和线稿来源。</p>
+            </div>
+            <div class="lineart-refinement-panel">
+              <label class="form-field compact-form-field"><span>当前货号补充要求（在项目统一要求之后追加）</span><input id="lineart-prompt-instruction" type="text" maxlength="180" placeholder="仅填写这个货号的特殊要求，可留空"></label>
+              <button class="button button-primary" id="generate-item-lineart" type="button" disabled>生成当前线稿</button>
+            </div>
+            <div class="lineart-refine-panel" id="lineart-refine-panel">
+              <label class="form-field compact-form-field"><span>基于当前线稿再改（只影响这一次）</span><input id="refine-lineart-prompt" type="text" maxlength="180" placeholder="例如：去掉红色尺寸线，保留主体轮廓"></label>
+              <button class="button button-teal" id="refine-item-lineart" type="button" disabled>基于当前线稿再生成</button>
+              <p class="meta-note">把现有线稿和上面提示词交给模型；成功后直接采用，并脱离类别共享。</p>
+            </div>
+            <div class="item-action-row secondary-actions">
+              <button class="button button-primary" id="generate-item-region" type="button" disabled>重新自动选区</button>
+              <button class="button button-outline manual-region-fallback" id="open-manual-crop" type="button" disabled>自动选错？人工框选</button>
+              <button class="button button-soft" id="replace-lineart" type="button" disabled>替换线稿</button>
+              <button class="button button-outline" id="manual-lineart" type="button" disabled>无产品图手工添加</button>
+              <input id="replace-lineart-input" type="file" accept=".png,.jpg,.jpeg,.webp" hidden>
+            </div>
+            <p class="quality-gate-note hidden" id="quality-gate-note" aria-live="polite"></p>
+          </article>
+
+          <article class="paper-panel share-panel hidden" id="share-panel">
+            <div>
+              <span class="panel-kicker">类别共用</span>
+              <h3 id="share-title">选择一个类别</h3>
+              <p id="share-copy">系统只提出类别建议。共用线稿必须明确确认外轮廓相同，并选择代表货号。</p>
+            </div>
+            <button class="button button-teal" id="open-share" type="button" disabled>确认并共享线稿</button>
+          </article>
+        </section>
+
+        <section class="workspace-view" data-view="mark">
+          <div class="view-heading violet-heading">
+            <div>
+              <span class="micro-label">STANDARD MARK</span>
+              <h2>正式唛头</h2>
+              <p>不生成单独 preview.pdf；这里显示正式版式的逐货号图像和唯一 PDF 产物。</p>
+            </div>
+            <button class="button button-violet" id="generate-standard" type="button" disabled>生成正式唛头</button>
+          </div>
+
+          <article class="paper-panel mark-gallery-panel">
+            <div class="panel-title-row">
+              <div><span class="panel-kicker">批量浏览</span><h3>全部货号唛头</h3></div>
+              <span class="panel-meta" id="mark-gallery-summary">等待项目</span>
+            </div>
+            <div class="mark-gallery" id="mark-item-strip">
+              <div class="empty-inline">打开项目后显示全部货号。</div>
+            </div>
+          </article>
+
+          <article class="mark-stage paper-panel">
+            <div class="panel-title-row">
+              <div><span class="panel-kicker">当前货号</span><h3 id="mark-title">等待项目</h3></div>
+              <span class="status-badge neutral" id="mark-status">未生成</span>
+            </div>
+            <button class="mark-preview-frame" id="mark-image-button" type="button" disabled>
+              <img class="hidden" id="mark-image" alt="正式唛头逐货号预览">
+              <span id="mark-image-empty">全部线稿就绪后生成正式唛头</span>
+            </button>
+            <div class="mark-facts-row">
+              <div><span>货号</span><strong id="mark-fact-item">—</strong></div>
+              <div><span>品名</span><strong id="mark-fact-name">—</strong></div>
+              <div><span>条码</span><strong id="mark-fact-barcode">—</strong></div>
+              <div><span>装箱数</span><strong id="mark-fact-qty">—</strong></div>
+              <div><span>线稿来源</span><strong id="mark-fact-lineart">—</strong></div>
+            </div>
+          </article>
+
+          <article class="delivery-name-card">
+            <div><span class="panel-kicker">统一交付命名</span><strong id="delivery-file-name">—</strong></div>
+            <span>内部固定文件 standard_mark.pdf；对外只交付核对通过的统一命名 PDF。</span>
+          </article>
+        </section>
+
+        <section class="workspace-view" data-view="verify">
+          <div class="view-heading blue-heading">
+            <div>
+              <span class="micro-label">VERIFY & DELIVER</span>
+              <h2>独立核对与 PDF 交付</h2>
+              <p>既可以核对当前项目，也可以上传外部合同与唛头文件建立独立核对 run。</p>
+            </div>
+            <button class="button button-blue" id="generate-and-verify" type="button" disabled>生成并核对当前项目</button>
+          </div>
+
+          <div class="verification-layout">
+            <div class="region-job-banner verify-job-banner hidden" id="verify-job-banner">
+              <div><strong id="verify-job-title">后台独立核对</strong><span id="verify-job-copy">—</span></div>
+              <div class="compact-progress"><span id="verify-job-fill"></span></div>
+            </div>
+            <article class="paper-panel verification-result-panel">
+              <div class="panel-title-row">
+                <div><span class="panel-kicker">项目核对</span><h3 id="verification-title">等待正式唛头</h3></div>
+                <span class="status-badge neutral" id="verification-status">未执行</span>
+              </div>
+              <div class="verification-overview" id="verification-overview">
+                <div><span>通过货号</span><strong id="verification-passed">—</strong></div>
+                <div><span>弱证据</span><strong id="verification-weak">—</strong></div>
+                <div><span>覆盖完整</span><strong id="verification-coverage">—</strong></div>
+              </div>
+              <div class="verification-table-wrap">
+                <table class="verification-table" id="verification-item-table">
+                  <thead>
+                    <tr>
+                      <th>状态</th>
+                      <th>货号</th>
+                      <th>条码</th>
+                      <th>装箱</th>
+                      <th>品名摘要</th>
+                      <th>问题摘要</th>
+                    </tr>
+                  </thead>
+                  <tbody id="verification-item-list">
+                    <tr><td colspan="6" class="empty-inline">等待核对报告。</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="verification-selected">
+                <div class="verification-detail-head">
+                  <div>
+                    <span class="panel-kicker">当前货号明细</span>
+                    <strong id="verification-detail-title">未选择货号</strong>
+                  </div>
+                  <span class="panel-meta" id="verification-detail-meta">点选上方列表行查看</span>
+                </div>
+                <div class="verification-detail-body">
+                  <div class="field-checks" id="verification-fields">
+                    <div class="empty-inline">等待核对报告。</div>
+                  </div>
+                  <button class="verification-image" id="verification-image-button" type="button" disabled>
+                    <img class="hidden" id="verification-image" alt="核对使用的唛头证据">
+                    <span id="verification-image-empty">点选上方货号查看证据</span>
+                  </button>
+                </div>
+              </div>
+              <div class="release-bar" id="release-bar" data-state="locked">
+                <div><strong id="release-title">交付门禁锁定</strong><span id="release-copy">只有最新核对完整通过且输入指纹未变化时才可下载。</span></div>
+                <div class="release-actions">
+                  <button class="button button-warning" id="open-manual-release" type="button" disabled>人工确认异常并放行</button>
+                  <a class="button button-blue disabled" id="download-pdf" href="#" aria-disabled="true">下载最终 PDF</a>
+                </div>
+              </div>
+            </article>
+
+            <details class="paper-panel external-verify-panel" id="external-verify-panel">
+              <summary class="external-verify-summary">
+                <div>
+                  <span class="panel-kicker">次要路径</span>
+                  <strong>核对已有唛头（独立 run）</strong>
+                  <small>不占用主工作区；仅在需要核对外部文件时展开</small>
+                </div>
+                <span class="status-badge neutral" id="external-status">收起</span>
+              </summary>
+              <div class="external-verify-body">
+                <form id="external-verification-form">
+                  <div class="external-file-grid">
+                    <label class="file-field">
+                      <span>原始合同</span>
+                      <strong id="external-contract-name">选择 .xls / .xlsx</strong>
+                      <input id="external-contract-input" type="file" accept=".xls,.xlsx" required>
+                    </label>
+                    <label class="file-field">
+                      <span>唛头文件</span>
+                      <strong id="external-marks-name">选择 PDF / CDR / 图片，可多选</strong>
+                      <input id="external-marks-input" type="file" accept=".pdf,.cdr,.png,.jpg,.jpeg,.webp,.bmp,.tif,.tiff" multiple required>
+                    </label>
+                  </div>
+                  <button class="button button-dark" id="external-verification-submit" type="submit">开始独立核对</button>
+                </form>
+                <div class="external-result" id="external-result">
+                  <span>结果保存为独立核对 run，不读取当前项目可变生产数据。</span>
+                </div>
+              </div>
+            </details>
+          </div>
+        </section>
+      </main>
+
+      <aside class="task-ledger">
+        <div class="ledger-heading">
+          <div><span class="micro-label">TASK LEDGER</span><h2>任务台账</h2></div>
+          <span class="count-chip" id="task-count">0</span>
+        </div>
+        <div class="ledger-filters" role="group" aria-label="任务筛选">
+          <button class="active" type="button" data-task-filter="open">待处理</button>
+          <button type="button" data-task-filter="all">全部</button>
+          <button type="button" data-task-filter="done">已完成</button>
+        </div>
+        <div class="task-list" id="task-list">
+          <div class="empty-inline">打开项目后，系统会按真实 readiness 生成下一步任务。</div>
+        </div>
+        <div class="rules-note">
+          <span class="panel-kicker">制作规范备忘</span>
+          <ul>
+            <li>类别共享只产生建议，必须人工确认同形。</li>
+            <li>缺产品图时更新合同、补销售图或手工添加线稿。</li>
+            <li>毛重、净重和箱规不作为当前生成阻断。</li>
+            <li>只交付核对通过的 PDF。</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="contract-modal" role="dialog" aria-modal="true" aria-labelledby="contract-modal-title">
+    <div class="modal-card">
+      <div class="modal-head"><div><span class="micro-label">NEW PROJECT</span><h2 id="contract-modal-title">上传采购合同</h2></div><button class="text-button" data-close-modal="contract-modal" type="button">关闭</button></div>
+      <form id="contract-form">
+        <label class="file-field large-file-field">
+          <span>合同文件</span>
+          <strong id="contract-upload-name">选择 .xls / .xlsx</strong>
+          <input id="contract-input" type="file" accept=".xls,.xlsx" required>
+        </label>
+        <label class="form-field"><span>内部 project_id（可选）</span><input id="project-id-input" type="text" placeholder="留空自动生成；项目显示名仍使用合同名称"></label>
+        <div class="modal-actions"><button class="button button-soft" data-close-modal="contract-modal" type="button">取消</button><button class="button button-primary" type="submit">开始解析</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="project-modal" role="dialog" aria-modal="true" aria-labelledby="project-modal-title">
+    <div class="modal-card compact-modal">
+      <div class="modal-head"><div><span class="micro-label">OPEN PROJECT</span><h2 id="project-modal-title">打开已有项目</h2></div><button class="text-button" data-close-modal="project-modal" type="button">关闭</button></div>
+      <form id="project-form">
+        <label class="form-field"><span>project_id</span><input id="project-open-input" type="text" placeholder="输入项目 ID" required></label>
+        <button class="button button-dark full-width" type="submit">打开项目</button>
+      </form>
+      <button class="sample-project-button" id="open-golden-project" type="button">打开 A5 义乌华洪拍照框黄金样例</button>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="manual-lineart-modal" role="dialog" aria-modal="true" aria-labelledby="manual-lineart-title">
+    <div class="modal-card">
+      <div class="modal-head"><div><span class="micro-label">MANUAL FALLBACK</span><h2 id="manual-lineart-title">无产品图手工添加线稿</h2></div><button class="text-button" data-close-modal="manual-lineart-modal" type="button">关闭</button></div>
+      <form id="manual-lineart-form">
+        <p class="modal-note" id="manual-lineart-copy">仅在明确确认货号身份后使用；上传会绑定当前合同 snapshot。</p>
+        <label class="file-field"><span>线稿文件</span><strong id="manual-lineart-name">选择 PNG / JPG / WEBP</strong><input id="manual-lineart-input" type="file" accept=".png,.jpg,.jpeg,.webp" required></label>
+        <label class="form-field"><span>操作人</span><input id="manual-reviewer" type="text" required></label>
+        <label class="form-field"><span>原因</span><textarea id="manual-reason" rows="3" required></textarea></label>
+        <label class="check-field"><input id="manual-confirm-item" type="checkbox" required><span>我已按合同确认当前货号身份无误</span></label>
+        <div class="modal-actions"><button class="button button-soft" data-close-modal="manual-lineart-modal" type="button">取消</button><button class="button button-primary" type="submit">上传并绑定当前合同</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="manual-crop-modal" role="dialog" aria-modal="true" aria-labelledby="manual-crop-title">
+    <div class="modal-card crop-modal-card">
+      <div class="modal-head"><div><span class="micro-label">MANUAL PRODUCT REGION</span><h2 id="manual-crop-title">人工框选产品区域</h2></div><button class="text-button" data-close-modal="manual-crop-modal" type="button">关闭</button></div>
+      <form id="manual-crop-form">
+        <p class="modal-note" id="manual-crop-copy">拖动框选完整产品。尺寸文字可以留在选区内，再通过线稿追加要求明确去除。</p>
+        <div class="manual-crop-stage"><canvas id="manual-crop-canvas" aria-label="拖动框选产品区域"></canvas><span id="manual-crop-empty">正在读取合同产品图…</span></div>
+        <div class="crop-toolbar"><button class="button button-soft" id="reset-manual-crop" type="button">重置选区</button><span id="manual-crop-size">尚未选择区域</span></div>
+        <div class="crop-audit-grid">
+          <label class="form-field"><span>操作人</span><input id="manual-crop-reviewer" type="text" autocomplete="name" required></label>
+          <label class="form-field"><span>选区原因</span><input id="manual-crop-reason" type="text" value="自动识别区域不准确，人工框选完整产品" required></label>
+        </div>
+        <div class="modal-actions"><button class="button button-soft" data-close-modal="manual-crop-modal" type="button">取消</button><button class="button button-primary" id="save-manual-crop" type="submit" disabled>使用此选区</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="create-group-modal" role="dialog" aria-modal="true" aria-labelledby="create-group-title">
+    <div class="modal-card">
+      <div class="modal-head"><div><span class="micro-label">MANUAL CATEGORY</span><h2 id="create-group-title">手动创建线稿类别</h2></div><button class="text-button" data-close-modal="create-group-modal" type="button">关闭</button></div>
+      <form id="create-group-form">
+        <p class="modal-note">这里只建立类别，不会自动共享线稿。建组后仍需选择代表货号，并人工确认所有成员外轮廓相同。</p>
+        <label class="form-field"><span>类别名称</span><input id="create-group-name" type="text" placeholder="例如：拍照框系列" required></label>
+        <fieldset class="member-picker-fieldset">
+          <legend>选择至少 2 个货号</legend>
+          <div class="member-picker" id="manual-group-members"></div>
+        </fieldset>
+        <label class="form-field"><span>操作人</span><input id="create-group-reviewer" type="text" required></label>
+        <label class="form-field"><span>建组依据</span><textarea id="create-group-reason" rows="3" placeholder="说明为何这些货号属于同一产品类别" required></textarea></label>
+        <div class="modal-actions"><button class="button button-soft" data-close-modal="create-group-modal" type="button">取消</button><button class="button button-teal" type="submit">仅创建类别</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="share-modal" role="dialog" aria-modal="true" aria-labelledby="share-modal-title">
+    <div class="modal-card">
+      <div class="modal-head"><div><span class="micro-label">CATEGORY SHARING</span><h2 id="share-modal-title">确认类别共用线稿</h2></div><button class="text-button" data-close-modal="share-modal" type="button">关闭</button></div>
+      <form id="share-form">
+        <p class="modal-note" id="share-modal-copy">必须选择当前有效的批准线稿作为代表。</p>
+        <label class="form-field"><span>代表货号</span><select id="share-representative" required></select></label>
+        <label class="form-field"><span>操作人</span><input id="share-reviewer" type="text" required></label>
+        <label class="form-field"><span>确认原因</span><textarea id="share-reason" rows="3" required></textarea></label>
+        <fieldset class="variation-fieldset"><legend>允许存在的差异</legend><label><input type="checkbox" name="share-variation" value="size" checked>尺寸</label><label><input type="checkbox" name="share-variation" value="color" checked>颜色</label><label><input type="checkbox" name="share-variation" value="pattern" checked>花纹</label></fieldset>
+        <label class="check-field"><input id="share-confirm-shape" type="checkbox" required><span>我已确认所有成员的可见外轮廓相同</span></label>
+        <div class="modal-actions"><button class="button button-soft" data-close-modal="share-modal" type="button">取消</button><button class="button button-teal" type="submit">确认并共享</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="manual-release-modal" role="dialog" aria-modal="true" aria-labelledby="manual-release-title">
+    <div class="modal-card">
+      <div class="modal-head"><div><span class="micro-label">MANUAL RELEASE</span><h2 id="manual-release-title">人工确认异常并放行</h2></div><button class="text-button" data-close-modal="manual-release-modal" type="button">关闭</button></div>
+      <p class="modal-note" id="manual-release-copy">机器核对结果不会被改写。请逐项检查当前异常事实，确认后才会放行当前这一个核对 run 的 PDF。</p>
+      <div class="manual-release-issues" id="manual-release-issues"></div>
+      <form id="manual-release-form">
+        <label class="form-field"><span>操作人</span><input id="manual-release-reviewer" type="text" maxlength="120" autocomplete="name" required></label>
+        <label class="form-field"><span>放行理由</span><textarea id="manual-release-reason" rows="3" maxlength="2000" placeholder="说明为何人工确认这些异常事实仍可交付" required></textarea></label>
+        <label class="check-field"><input id="manual-release-confirm" type="checkbox" required><span>我已逐项检查上面的异常事实，并确认按当前 PDF 放行</span></label>
+        <div class="modal-actions"><button class="button button-soft" data-close-modal="manual-release-modal" type="button">关闭</button><button class="button button-warning" id="manual-release-submit" type="submit">记录确认并放行</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="image-lightbox hidden" id="image-lightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-title">
+    <div class="lightbox-card">
+      <div class="lightbox-head"><div><span class="micro-label">IMAGE VIEWER</span><h2 id="lightbox-title">查看图片</h2><p id="lightbox-meta"></p></div><button class="button button-soft" id="lightbox-close" type="button">关闭</button></div>
+      <div class="lightbox-stage" id="lightbox-stage"><img id="lightbox-image" alt="放大查看"></div>
+      <label class="zoom-control"><span>缩放 · 可用鼠标滚轮</span><input id="zoom-range" type="range" min="40" max="300" value="100"><strong id="zoom-value">100%</strong></label>
+    </div>
+  </div>
+
+  <div class="toast hidden" id="toast" role="status"><strong id="toast-title"></strong><span id="toast-copy"></span></div>
+
+  
+  <div class="modal-backdrop hidden" id="provider-modal" role="dialog" aria-modal="true" aria-labelledby="provider-modal-title">
+    <div class="modal-card provider-modal-card">
+      <div class="modal-head"><div><span class="micro-label">LINEART MODEL</span><h2 id="provider-modal-title">线稿模型与密钥</h2></div><button class="text-button" data-close-modal="provider-modal" type="button">关闭</button></div>
+      <p class="modal-note">密钥只保存在本机忽略文件，不会出现在接口响应或 Git。多 Key 用逗号分隔或多次“追加保存”，批量生成会按 Key 池并发。</p>
+      <div class="provider-status-grid">
+        <div><span>当前提供方</span><strong id="provider-active-label">—</strong></div>
+        <div><span>当前模型</span><strong id="provider-active-model">—</strong></div>
+        <div><span>Grok Key 数量</span><strong id="provider-grok-keys">0</strong></div>
+        <div><span>OpenAI Key 数量</span><strong id="provider-openai-keys">0</strong></div>
+      </div>
+      <form id="provider-select-form" class="provider-form">
+        <label class="form-field"><span>提供方</span>
+          <select id="provider-select" required>
+            <option value="grok_image">Grok Imagine</option>
+            <option value="openai_image">OpenAI / 兼容网关</option>
+          </select>
+        </label>
+        <label class="form-field"><span>模型</span>
+          <select id="provider-model-select"></select>
+        </label>
+        <label class="form-field"><span>自定义模型（可选，覆盖上方选择）</span><input id="provider-model-custom" type="text" maxlength="160" placeholder="例如 grok-imagine-image"></label>
+        <div class="modal-actions"><button class="button button-primary" type="submit">保存模型选择</button></div>
+      </form>
+      <form id="provider-key-form" class="provider-form">
+        <label class="form-field"><span>密钥目标</span>
+          <select id="provider-key-target">
+            <option value="grok_image">Grok（写入 .env.grok.local）</option>
+            <option value="openai_image">OpenAI（写入 .env.openai.local）</option>
+          </select>
+        </label>
+        <label class="form-field"><span>API Key</span><input id="provider-api-key" type="password" autocomplete="off" placeholder="粘贴后保存；不会回显"></label>
+        <label class="check-field"><input id="provider-key-append" type="checkbox" checked><span>追加到现有 Key 池（多 Key 并行）</span></label>
+        <div class="modal-actions"><button class="button button-soft" type="submit">保存密钥</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="pending-share-modal" role="dialog" aria-modal="true" aria-labelledby="pending-share-modal-title">
+    <div class="modal-card">
+      <div class="modal-head"><div><span class="micro-label">CATEGORY SHARE</span><h2 id="pending-share-modal-title">确认同形并共享线稿</h2></div><button class="text-button" data-close-modal="pending-share-modal" type="button">关闭</button></div>
+      <p class="modal-note">系统只生成了类别代表货号。共享会把同一 approved 线稿绑定到同组成员，不会再次调用图像 API。必须人工确认外轮廓相同。</p>
+      <div id="pending-share-list" class="pending-share-list"></div>
+      <form id="pending-share-form">
+        <label class="form-field"><span>操作人</span><input id="pending-share-reviewer" type="text" required maxlength="80"></label>
+        <label class="form-field"><span>原因</span><input id="pending-share-reason" type="text" required maxlength="200" placeholder="例如：同品类仅颜色/尺寸差异"></label>
+        <label class="check-field"><input id="pending-share-confirm" type="checkbox" required><span>我确认所列类别成员外轮廓相同，差异仅限尺寸/颜色/花纹</span></label>
+        <div class="modal-actions"><button class="button button-soft" data-close-modal="pending-share-modal" type="button">取消</button><button class="button button-teal" type="submit">共享全部待确认类别</button></div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/assets/app.js?v=workbench28"></script>
+</body>
+</html>

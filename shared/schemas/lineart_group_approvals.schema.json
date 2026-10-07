@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "lineart_group_approvals.json",
+  "type": "object",
+  "required": ["schema_version", "project_id", "approvals"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "project_id": { "type": "string", "minLength": 1 },
+    "approvals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "group_id", "normalized_cn_name", "members", "members_sha256",
+          "representative_item_no", "allowed_variations", "confirmed_same_shape",
+          "reviewer", "reason", "asset_path", "asset_sha256", "approved_at"
+        ],
+        "properties": {
+          "group_id": { "type": "string", "pattern": "^cn-[0-9a-f]{16}$" },
+          "normalized_cn_name": { "type": "string", "minLength": 1 },
+          "members": { "type": "array", "minItems": 2, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+          "members_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "representative_item_no": { "type": "string", "minLength": 1 },
+          "allowed_variations": {
+            "type": "array", "uniqueItems": true,
+            "items": { "enum": ["size", "color", "pattern"] }
+          },
+          "confirmed_same_shape": { "const": true },
+          "reviewer": { "type": "string", "minLength": 1 },
+          "reason": { "type": "string", "minLength": 1 },
+          "asset_path": { "type": "string", "minLength": 1 },
+          "asset_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "representative_region_artifact_id": { "type": ["string", "null"] },
+          "approved_at": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

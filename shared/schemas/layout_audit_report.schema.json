@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mark-automation.local/schemas/layout_audit_report.schema.json",
+  "title": "layout_audit_report.json",
+  "description": "Acceptance findings measured on rendered mark artwork rather than on the layout plan. Severity carries the layer: error is L0/L1 (the artwork breaks a standard or disagrees with itself), warning is L2 (outside the range measured on factory marks - a person should look), info is L2 (inside the range but away from where factory marks cluster).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "policy_id",
+    "source_pdf",
+    "zoom",
+    "faces",
+    "summary",
+    "findings"
+  ],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "policy_id": { "type": "string" },
+    "source_pdf": { "type": "string" },
+    "zoom": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Render zoom used for the layer sweep. 4 is the factory metric baseline (288 DPI, 0.353 mm cells)."
+    },
+    "band_source": {
+      "type": ["string", "null"],
+      "description": "Calibration file the L2 bands came from, or null when no bands were available."
+    },
+    "faces": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/face" }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["faces", "errors", "warnings", "info"],
+      "properties": {
+        "faces": { "type": "integer", "minimum": 0 },
+        "errors": { "type": "integer", "minimum": 0 },
+        "warnings": { "type": "integer", "minimum": 0 },
+        "info": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "description": "Every face's findings, flattened.",
+      "items": { "$ref": "#/$defs/finding" }
+    }
+  },
+  "$defs": {
+    "face": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "item_no",
+        "face",
+        "family",
+        "panel_mm",
+        "aspect",
+        "metrics",
+        "alignment_error",
+        "elements",
+        "findings"
+      ],
+      "properties": {
+        "item_no": { "type": "string" },
+        "face": { "enum": ["front", "side"] },
+        "family": { "type": "string" },
+        "panel_mm": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "aspect": { "type": "number" },
+        "metrics": { "$ref": "#/$defs/metrics" },
+        "alignment_error": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Mean normalised distance from each element to its nearest alignment partner across the six snap axes. 0 means everything shares an edge or centre line with something."
+        },
+        "elements": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Elements the audit could isolate on this face."
+        },
+        "findings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/finding" }
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ink_coverage",
+        "largest_empty_rect",
+        "spread",
+        "balance",
+        "panel_mm",
+        "aspect"
+      ],
+      "properties": {
+        "ink_coverage": {
+          "type": "number",
+          "description": "Share of the face carrying ink."
+        },
+        "largest_empty_rect": {
+          "type": "number",
+          "description": "Largest all-empty axis-aligned rectangle, as a share of face area."
+        },
+        "spread": {
+          "type": "number",
+          "description": "Ink RMS distance from its own centroid over that of a uniformly inked face. Below 1 is clumped, above 1 is pushed to the edges."
+        },
+        "balance": {
+          "type": "number",
+          "description": "Distance from the ink centroid to the face centre, as a share of the half-diagonal. 0 is centred."
+        },
+        "panel_mm": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "aspect": { "type": "number" }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "required": ["severity", "code", "message"],
+      "properties": {
+        "severity": { "enum": ["error", "warning", "info"] },
+        "code": {
+          "type": "string",
+          "examples": [
+            "ink_outside_safe_area",
+            "ink_collision",
+            "element_ink_occluded",
+            "ink_not_attributed_to_any_layer",
+            "group_scale_inconsistent",
+            "aspect_locked_component_stretched",
+            "text_condensed_past_declared_floor",
+            "text_stretched_beyond_natural_width",
+            "glyphs_distorted_unevenly",
+            "style_metric_outside_factory_band",
+            "style_metric_unusual_for_factory"
+          ]
+        },
+        "message": { "type": "string" },
+        "face": { "enum": ["front", "side"] },
+        "item_no": { "type": ["string", "null"] },
+        "component": { "type": "string" },
+        "components": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

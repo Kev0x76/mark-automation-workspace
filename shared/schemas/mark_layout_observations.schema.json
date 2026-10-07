@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mark-automation.local/schemas/mark_layout_observations.schema.json",
+  "title": "docs/mark-layout-paradigms/observations/<SAMPLE>.json",
+  "description": "What was measured on one reference sample (a factory mark file, or the owner's calibration answers): its pages and every unique mark face. Paradigm cards in registry.json cite these obs_ids. One file per sample so agents adding samples never edit the same file.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "sample", "measured", "pages", "faces"],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "sample": { "type": "string", "pattern": "^[A-Z][A-Z0-9]*$" },
+    "measured": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["date", "by", "method", "verification"],
+      "properties": {
+        "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "by": { "type": "string" },
+        "method": { "type": "string", "description": "How the numbers were produced, including the script path when one exists." },
+        "verification": { "type": "string", "description": "Who re-measured independently and what did or did not reproduce." }
+      }
+    },
+    "pages": { "type": "array", "items": { "$ref": "#/$defs/page" } },
+    "faces": { "type": "array", "items": { "$ref": "#/$defs/face" } }
+  },
+  "$defs": {
+    "page": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["obs_id", "page", "layout"],
+      "properties": {
+        "obs_id": { "type": "string", "pattern": "^[A-Z][A-Z0-9]*-p\\d{2}$" },
+        "page": { "type": "integer", "minimum": 1 },
+        "page_w_mm": { "type": ["number", "null"] },
+        "page_h_mm": { "type": ["number", "null"] },
+        "layout": { "type": "string", "description": "e.g. 'unfolded [F,S,F,S] 1:1' or 'imposition 4 rows x [F,S]'." },
+        "pt_per_mm": { "type": ["number", "null"] },
+        "notes": { "type": "string" }
+      }
+    },
+    "zone": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["element", "x0", "y0", "x1", "y1"],
+      "properties": {
+        "element": {
+          "type": "string",
+          "enum": ["item_no_bar", "brand_logo", "name_cn", "names_latin", "lineart", "barcode", "origin_text", "icon_row", "table", "table_cell", "carton_size_text", "date_text", "other"]
+        },
+        "x0": { "type": "number" },
+        "y0": { "type": "number" },
+        "x1": { "type": "number" },
+        "y1": { "type": "number" },
+        "orientation": { "type": "string", "enum": ["h", "v", "n/a"] },
+        "text": { "type": "string" },
+        "note": { "type": "string" }
+      }
+    },
+    "face": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["obs_id", "page", "role", "item_no", "face_w_mm", "face_h_mm", "face_size_method", "aspect_w_over_h", "structure_code", "table_layout", "barcode", "item_bar_w_frac", "confidence", "verified"],
+      "properties": {
+        "obs_id": { "type": "string", "pattern": "^[A-Z][A-Z0-9]*-p\\d{2}(-r\\d+)?-(front|side)$" },
+        "page": { "type": "integer", "minimum": 1 },
+        "row": { "type": ["integer", "null"] },
+        "role": { "type": "string", "enum": ["front", "side"] },
+        "item_no": { "type": "string" },
+        "face_w_mm": { "type": ["number", "null"] },
+        "face_h_mm": { "type": ["number", "null"] },
+        "face_size_method": { "type": "string" },
+        "aspect_w_over_h": { "type": ["number", "null"], "description": "Face width / face height. Front = L/H, side = W/H. It does not depend on print scale, so it is recorded even when face_w_mm/face_h_mm are unknown (drawing not proven 1:1); when both mm are given it must equal their ratio." },
+        "structure_code": { "type": "string" },
+        "zones": { "type": "array", "items": { "$ref": "#/$defs/zone" }, "description": "Bounding boxes as fractions of the face (origin top-left, y down)." },
+        "table_layout": { "type": "string", "description": "'none' or columns listed top-to-bottom, e.g. '2col QTY(2rows),NAME | MEAS,NW,GW'." },
+        "barcode": { "type": "string", "description": "'none' or orientation-position, e.g. 'v-right'." },
+        "item_bar_w_frac": { "type": ["number", "null"] },
+        "item_bar_h_frac": { "type": ["number", "null"] },
+        "item_no_chars": { "type": ["integer", "null"] },
+        "item_digit_h_mm": { "type": ["number", "null"] },
+        "item_text_w_mm": { "type": ["number", "null"] },
+        "latin_name_h_mm": { "type": ["number", "null"] },
+        "table_value_h_mm": { "type": ["number", "null"] },
+        "confidence": { "type": "string", "enum": ["high", "medium", "low"] },
+        "verified": { "type": "string", "enum": ["reproduced", "partially", "not_checked", "disputed"], "description": "Outcome of the independent re-measurement for this face." },
+        "notes": { "type": "string" }
+      }
+    }
+  }
+}

@@ -1,0 +1,321 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mark-automation.local/schemas/verification_report.schema.json",
+  "title": "verification_report.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "project_id",
+    "verified_at",
+    "checker",
+    "run",
+    "inputs",
+    "status",
+    "summary",
+    "rules",
+    "items",
+    "artifacts",
+    "warnings",
+    "errors"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "verified_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "checker": { "$ref": "#/$defs/tool" },
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["run_id"],
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "run_dir": {
+          "type": "string"
+        },
+        "source_url": {
+          "type": "string"
+        }
+      }
+    },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract", "mark_file"],
+      "properties": {
+        "contract": { "$ref": "#/$defs/artifact" },
+        "mark_file": { "$ref": "#/$defs/artifact" }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["PASS", "FAIL", "NEEDS_MANUAL_REVIEW", "ERROR"]
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total_items",
+        "passed_items",
+        "failed_items",
+        "needs_review_items",
+        "warning_count",
+        "error_count"
+      ],
+      "properties": {
+        "total_items": { "$ref": "#/$defs/non_negative_integer" },
+        "passed_items": { "$ref": "#/$defs/non_negative_integer" },
+        "failed_items": { "$ref": "#/$defs/non_negative_integer" },
+        "needs_review_items": { "$ref": "#/$defs/non_negative_integer" },
+        "warning_count": { "$ref": "#/$defs/non_negative_integer" },
+        "error_count": { "$ref": "#/$defs/non_negative_integer" }
+      }
+    },
+    "rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "truth_source",
+        "manifest_trusted_as_truth",
+        "page_fallback_counts_as_pass",
+        "visual_cell_candidate_counts_as_pass"
+      ],
+      "properties": {
+        "truth_source": {
+          "type": "string",
+          "const": "contract_xls_or_xlsx_and_mark_file"
+        },
+        "manifest_trusted_as_truth": {
+          "type": "boolean",
+          "const": false
+        },
+        "page_fallback_counts_as_pass": {
+          "type": "boolean",
+          "const": false
+        },
+        "visual_cell_candidate_counts_as_pass": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/item_result" }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["verification_report", "verification_summary_csv", "v5_run_dir"],
+      "properties": {
+        "verification_report": { "$ref": "#/$defs/artifact_or_null" },
+        "verification_summary_csv": { "$ref": "#/$defs/artifact_or_null" },
+        "v5_run_dir": { "$ref": "#/$defs/artifact_or_null" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/issue" }
+    },
+    "errors": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/issue" }
+    }
+  },
+  "$defs": {
+    "non_negative_integer": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "project_relative_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_or_null": {
+      "anyOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/artifact" }
+      ]
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "status"],
+      "properties": {
+        "path": { "$ref": "#/$defs/project_relative_path" },
+        "status": {
+          "type": "string",
+          "enum": [
+            "expected",
+            "present",
+            "generated",
+            "missing",
+            "skipped",
+            "failed"
+          ]
+        },
+        "media_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{64}$"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      }
+    },
+    "scalar_value": {
+      "type": ["string", "number", "integer", "boolean", "null"]
+    },
+    "scalar_or_list": {
+      "anyOf": [
+        { "$ref": "#/$defs/scalar_value" },
+        {
+          "type": "array",
+          "items": { "$ref": "#/$defs/scalar_value" }
+        }
+      ]
+    },
+    "item_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["item_no", "status", "fields", "evidence_statuses", "issues"],
+      "properties": {
+        "item_no": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": ["PASS", "FAIL", "NEEDS_MANUAL_REVIEW", "ERROR"]
+        },
+        "fields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/field_result" }
+        },
+        "evidence_statuses": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "TEXT_LAYER",
+              "BARCODE_SCAN",
+              "OCR",
+              "PAGE_FALLBACK",
+              "VISUAL_CELL_CANDIDATE",
+              "MANUAL",
+              "UNAVAILABLE"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "issues": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/issue" }
+        }
+      }
+    },
+    "field_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["field", "status", "expected", "actual", "evidence_type"],
+      "properties": {
+        "field": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "MISMATCH",
+            "MISSING",
+            "NEEDS_MANUAL_REVIEW",
+            "NOT_APPLICABLE",
+            "ERROR"
+          ]
+        },
+        "expected": { "$ref": "#/$defs/scalar_or_list" },
+        "actual": { "$ref": "#/$defs/scalar_or_list" },
+        "evidence_type": {
+          "type": "string",
+          "enum": [
+            "TEXT_LAYER",
+            "BARCODE_SCAN",
+            "OCR",
+            "PAGE_FALLBACK",
+            "VISUAL_CELL_CANDIDATE",
+            "MANUAL",
+            "UNKNOWN"
+          ]
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "issue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "severity", "message"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["info", "warning", "error", "needs_review"]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "item_no": {
+          "type": "string"
+        },
+        "field": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

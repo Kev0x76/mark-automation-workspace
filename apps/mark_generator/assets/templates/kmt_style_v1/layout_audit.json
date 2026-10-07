@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "kmt_style_v1_layout_audit_v1",
+  "derives_from": "adaptive_layout.json",
+  "units": "mm unless stated; tolerances are fractions",
+  "provenance": {
+    "why_this_file_exists": "Constants that came out of measurement are evidence and belong in a policy file with that evidence attached, not buried in a checker. Same rule adaptive_layout.json already follows.",
+    "measured_on": "2026-09-05, kmt_style_v1 rendered at its own native face (200.0 x 165.1 mm front, 120 x 165 mm side) with audit layers on",
+    "not_owner_approved": "Numeric tolerances below are this module's proposal, chosen far looser than float noise and far tighter than any defect in the 2026-09-02 evidence. They are not an owner ruling. Two items in this file ARE settled and say so on themselves: text_fidelity.item_no (approved design parameter) and style_band_disposition (warning, never blocking), both delegated by the owner on 2026-09-10."
+  },
+  "uniform_scale_groups": {
+    "info_cells": {
+      "elements": [
+        "cell_qty",
+        "cell_name",
+        "cell_meas",
+        "cell_nw",
+        "cell_gw"
+      ],
+      "axis": "y",
+      "tolerance": 0.02,
+      "pattern": {
+        "taller_members": [
+          "cell_qty"
+        ],
+        "min_taller_ratio": 1.05,
+        "evidence": "The factory reference 世荣.pdf (20 pages x 2 side faces = 40 faces) draws Q.TY's row 1.4886-1.4926 x the other rows in the single-column five-cell form (12 faces, aspect h/w 0.784-1.070), with the other four rows equal to within 1.0025. Measured by tools/measure_factory_side_table.py; the same ratio is recorded in adaptive_layout.json side_table with the per-face numbers. The taller row is not the table being torn apart: on p17 the Q.TY plate is 76.39 pt against 51.26 pt for the other four, and Q.TY's own label glyphs are 24.05 pt against 17.72 pt - so the tile was drawn bigger, it was not a shared scale that drifted. min_taller_ratio is deliberately loose (1.05): this check measures drawn ink against a source clip, and the five source clips are not the same height, so the reference's 1.489 does not convert to one number here. What the pattern asserts is the SHAPE - one taller member, the rest equal - which is unit-free.",
+        "alt_pattern": {
+          "rule": "base.pdf own tiles",
+          "evidence": "adaptive_layout.json side_table.row_heights also offers 'artwork', which draws each cell at its own tile's source height (128.5 / 66.1 / 83.8 / 70.7 / 70.6 pt) rather than at a factory-reference row ratio. That path is not a torn table either: it is base.pdf's own five tiles, and the tiles are what they are. The check still fails an unstructured spread - a table drawn at neither the reference's shape nor the artwork's own - because that is a face that follows no statement at all. This is the reason the pattern is a SHAPE assertion rather than a number: it has to accept two statements, and the two disagree by construction."
+        }
+      },
+      "evidence": "The five cells are one table in base.pdf, so one vertical scale applies to all of them. The 2026-09-02 review measured vertical scales of 0.767 to 1.579 across this group - a factor of two inside one table - and no existing check reported it.",
+      "status": "approved design parameter",
+      "note": "The group sits at a vertical scale of 0.540-0.544 on the current side face. Settled 2026-09-10 (owner delegated), on the same reasoning as text_fidelity.item_no: the shipping mark defines the standard, so the scale it uses is an approved parameter and not a defect. What this check tests is UNIFORMITY, not the value - the five cells are one table in base.pdf, so a spread inside the group means the table has been torn apart. The measured spread is 0.7% against a 2% tolerance. The 2026-09-02 review found 0.767 to 1.579 in that same group, a factor of two inside one table, which is the defect this exists to catch and is unrelated to the value being 0.54. 2026-09-17: 'uniform' was refined to mean 'uniform except where the artwork says otherwise'. The five cells are five separate tiles in base.pdf (128.5 / 66.1 / 83.8 / 70.7 / 70.6 pt tall), not one scaled block, so 'one scale for all' was never the artwork's own claim; the factory reference draws a taller Q.TY row, and the check now accepts that one declaration while still failing an unstructured spread. What it no longer catches: a Q.TY row that is taller than 1.489x by more than the 5% ratio tolerance, and any spread that happens to sit inside the pattern's shape. Reported to the owner 2026-09-17 rather than widened silently - see the round."
+    }
+  },
+  "aspect_locked_fit_modes": [
+    "uniform",
+    "rotate90_uniform"
+  ],
+  "aspect_tolerance": 0.02,
+  "aspect_evidence": "adaptive_layout.json already records each component's fit mode. A component declared 'uniform' that renders with different horizontal and vertical scale has been stretched, whatever the plan said. The 2026-09-02 review measured Q.TY at a horizontal/vertical scale ratio of 3.64. 2026-09-15: the verdict is taken on the +-1 px interval of the four ink extents (two rendered, two source), not on the point estimate, and an interval that straddles the band is re-rasterised at the resolving zoom via the same remeasure hook the glyph check uses; only an interval that has cleared the band may be reported as a defect ('aspect_locked_component_stretched'), otherwise it is a warning ('aspect_locked_component_unresolved_at_audit_resolution'). Found by the 2026-09-15 acceptance matrix: 'origin_text' on the 450 x 100 mm owner front read 0.9763 at the audit's zoom 3 - 2.4% past this tolerance - and 0.9817/0.9909/1.0002 at zoom 6/12/24; the component is placed by _place_uniform and was never stretched. The identical mistake had already been fixed for text_fidelity, one check earlier.",
+  "text_fidelity": {
+    "names": {
+      "min_condense": 1.0
+    },
+    "cn_name": {
+      "min_condense": 1.0
+    },
+    "qty": {
+      "min_condense": 1.0
+    },
+    "es_name": {
+      "min_condense": 1.0
+    },
+    "item_no": {
+      "min_condense": "atlas:item_no_hscale_by_digits",
+      "note": "The template condenses the item number by digit count - 0.796 at 7 digits, down to 0.464 at 12. Settled 2026-09-10 (owner delegated): this is an APPROVED design parameter, not a defect. The current standard mark is the reference - it is what the owner approved and what the factory prints - so a property of that mark cannot be a defect against a standard it defines. The check's job is unchanged and now has a reason: allow the template's own floor per digit count and nothing worse, so adaptive faces can never squeeze the digits harder than today's mark already does.",
+      "status": "approved design parameter"
+    }
+  },
+  "fidelity_tolerance": 0.02,
+  "per_character_spread_tolerance": 0.05,
+  "per_character_evidence": "A font applies one transform to a whole run. The 2026-09-02 review measured Q, T, Y and S at 0.40 of natural width while W sat at 0.64 in the same label, which no font and no honest transform can produce.",
+  "text_fidelity_measurement": {
+    "edge_quantisation_px": 1,
+    "reference_px_per_em": 400,
+    "reference_max_pixels": 16000000,
+    "remeasure_target_uncertainty": 0.01,
+    "remeasure_max_zoom": 48,
+    "remeasure_max_pixels": 16000000,
+    "shared_with": "check_aspect_locked_components reads edge_quantisation_px, remeasure_target_uncertainty and remeasure_max_zoom from this block. The same measurement problem applies to both: text extents and component ink boxes are thresholded rasters, and a verdict that +-1 px can flip belongs to the raster, not the artwork. The key keeps its name so the existing evidence stays where it was written.",
+    "evidence": "2026-09-15. (1) Crash: the reference run was drawn at the production point size times zoom 8; the 430 pt item number on the 900x200 mm owner front (carton 90x36x20 cm) became a 47481 x 20644 px page (980 MP) and MuPDF raised FzErrorLimit 'Overly large image', so audit_revision crashed on owner anchors 5 and 6. Distortion is a ratio, so the reference now uses a density per em with a pixel ceiling. (2) False positive: the side qty '36' of carton 30.5x30.5x9.5 cm measured 74 x 51 px at zoom 3 and 1.030 distortion, but 1.009 at zoom 6 and 1.009 at zoom 12; same font file (arialbd.ttf) in renderer and reference, hscale 1.0, no other layer ink in its box. One pixel on 51 is 2%, the whole tolerance. Verdicts are now taken on the worst-case interval allowed by +-1 px per extent, and an interval that straddles a limit is re-rasterised at the zoom that resolves it.",
+    "status": "edge_quantisation_px is a property of thresholded rasters, not a choice. The other numbers are this module's proposal: 400 px/em puts the reference's own error near 0.6% (under a third of fidelity_tolerance); a 1% target leaves room for a 2% tolerance to be decided; 48x (3456 DPI) and 16 MP only bound cost."
+  },
+  "barcode_final_pdf": {
+    "decode_dpi": [
+      300,
+      600
+    ],
+    "decode_margin_mm": 4.0,
+    "decode_margin_share": 0.2,
+    "allowed_physical_orientations": [
+      0,
+      270
+    ],
+    "edge_quantisation_px": 1,
+    "group_uniform_tolerance": 0.01,
+    "group_min_bracket_px": 600,
+    "severity": "error",
+    "evidence": "decode_dpi: docs/layout-acceptance-criteria-20260902.md requires a zxingcpp decode at 300 DPI and at 600 DPI, each once. allowed_physical_orientations: owner rule 2026-09-15 (docs/calibration-rules-from-owner-20260915.md 4.5) - 0 is flat with digits below, 270 clockwise is vertical with digits on the right; 90 and 180 are not used. zxingcpp's orientation convention was measured on SKU 3210808: front_standard (carton 38.5x26.5x18.5 cm, digits right by eye) reads -90, and np.rot90 of that crop by 90/180/270 deg counter-clockwise reads 180/90/0, so orientation mod 360 is the clockwise physical angle. The same run found the front_wide_band barcode of carton 27.5x27.5x10.5 cm, planned physical 0, printing at 180 with its digits above the bars. Group uniformity: owner rule 2026-09-07 (docs/barcode-uniform-scaling-20260907.md), bars + digits + brackets are one vector group.",
+    "status": "Directions, decode resolutions and error severity are settled rules (owner 2026-09-15, acceptance criteria 2026-09-02, owner 2026-09-07). decode margins, group_uniform_tolerance and group_min_bracket_px are this module's proposal: the margin exceeds the 11-module EAN-13 left quiet zone at every X-dimension the engine has planned (<= 1.25 mm); 1% of the bracket extent sits above measured float and rasterisation noise and far below any separate stretch of bars or digits; 600 px on the bracket's short side makes its +-1 px edge error about 0.7%."
+  },
+  "nested_pairs": [
+    [
+      "barcode",
+      "barcode_brackets"
+    ],
+    [
+      "item_no",
+      "item_no_bar"
+    ],
+    [
+      "cell_qty",
+      "qty"
+    ],
+    [
+      "cell_name",
+      "es_name"
+    ]
+  ],
+  "occlusion_allowed": [
+    "item_no_bar"
+  ],
+  "occlusion_evidence": "The item-number bar is solid black and the number is knocked out of it in white, so the bar losing ink under the digits is the design. Nothing else on a Kmt Style v1 mark is meant to cover another element.",
+  "tolerances": {
+    "collision_px": 1,
+    "occlusion_px": 4,
+    "unattributed_px": 8,
+    "safe_area_mm": 0.5
+  },
+  "style_band_disposition": {
+    "severity": "warning",
+    "status": "settled 2026-09-10, owner delegated",
+    "rule": "a metric outside the calibrated factory band is reported and never blocks release",
+    "why": "The bands are calibrated from 19 front and 19 side factory panels. A sample that size cannot carry a release gate: it does not know the shape of its own tails, and the factory sample already contains a front panel at 41.7% ink that widens the raw range on its own. Blocking on it would reject marks for being unusual rather than for being wrong. The checks that DO block are the ones with hard truth behind them - L0 physical and print rules, L1 self-consistency - and neither needs a sample or a ruling to be right.",
+    "revisit_when": "the calibration set is large enough to state a tail, or the owner confirms a specific band as a hard limit"
+  }
+}

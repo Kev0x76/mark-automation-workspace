@@ -1,0 +1,261 @@
+{
+  "template_id": "kmt_style_v1",
+  "version": "1.0.0",
+  "source": "samples/golden_pdfs/*.pdf (measured 2026-07-05)",
+  "units": "pt",
+  "coordinate_system": "panel-local, origin top-left, y down",
+  "panel": {
+    "width": 567.0,
+    "height": 468.0
+  },
+  "grid": {
+    "columns": 3,
+    "rows": 8,
+    "pairs_per_page": 24,
+    "fill_order": "column_major",
+    "page_width": 3826.771728515625,
+    "page_height_full": 4251.96826171875,
+    "margin_left": 188.0,
+    "margin_top": 57.0,
+    "margin_bottom": 149.97,
+    "pair_pitch_x": 1172.0,
+    "row_pitch_y": 511.0,
+    "side_offset_x": 567.0
+  },
+  "fonts": {
+    "cn_bold": {
+      "candidates": [
+        "{WINDIR}/Fonts/msyhbd.ttc",
+        "{WINDIR}/Fonts/Noto Sans SC Bold (TrueType).otf",
+        "/usr/share/fonts/google-noto-cjk/NotoSansCJK-Bold.ttc",
+        "/usr/share/fonts/google-noto-sans-cjk-ttc-fonts/NotoSansCJK-Bold.ttc",
+        "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc"
+      ],
+      "fontconfig_families": [
+        "Noto Sans CJK SC:style=Bold",
+        "Noto Sans SC:style=Bold",
+        "Source Han Sans SC:style=Bold"
+      ],
+      "required_flags": {
+        "bold": true
+      },
+      "required_glyphs": "中文品名",
+      "fallback": "china-ss"
+    },
+    "latin_bold": {
+      "candidates": [
+        "{WINDIR}/Fonts/arialbd.ttf",
+        "/usr/share/fonts/liberation-sans/LiberationSans-Bold.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"
+      ],
+      "fallback": "hebo"
+    },
+    "latin": {
+      "candidates": [
+        "{WINDIR}/Fonts/arial.ttf",
+        "/usr/share/fonts/liberation-sans/LiberationSans-Regular.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"
+      ],
+      "fallback": "helv"
+    },
+    "barcode_hri": {
+      "candidates": [
+        "{WINDIR}/Fonts/arial.ttf",
+        "{WINDIR}/Fonts/OCR-B 10 BT.ttf",
+        "/usr/share/fonts/liberation-sans/LiberationSans-Regular.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"
+      ],
+      "fallback": "helv"
+    }
+  },
+  "front": {
+    "base_page": 0,
+    "item_no": {
+      "bar_rect": [
+        17.6,
+        18.5,
+        548.9,
+        199.2
+      ],
+      "x0": 21.1,
+      "baseline_y": 181.3,
+      "max_width": 525.0,
+      "fontsize": 166.3,
+      "font": "latin_bold",
+      "color": [
+        1,
+        1,
+        1
+      ],
+      "fit": "center_in_bar"
+    },
+    "names": {
+      "top_y": 263.0,
+      "bottom_y": 370.0,
+      "leading_ratio": 1.15,
+      "block_gap": 3.0,
+      "max_lines_per_name": 2,
+      "lines": [
+        {
+          "field": "cn_name",
+          "font": "cn_bold",
+          "fontsize": 16.8,
+          "baseline": [
+            23.6,
+            280.7
+          ],
+          "max_lines": 2
+        },
+        {
+          "field": "it_name",
+          "font": "latin_bold",
+          "fontsize": 17.0,
+          "baseline": [
+            24.9,
+            309.0
+          ],
+          "max_lines": 2
+        },
+        {
+          "field": "es_name",
+          "font": "latin_bold",
+          "fontsize": 17.0,
+          "baseline": [
+            25.0,
+            334.4
+          ],
+          "max_lines": 2
+        },
+        {
+          "field": "en_name",
+          "font": "latin_bold",
+          "fontsize": 17.0,
+          "baseline": [
+            24.7,
+            358.5
+          ],
+          "max_lines": 2
+        }
+      ],
+      "max_width": 192.0,
+      "fit": "shrink_fontsize",
+      "min_fontsize": 10.0
+    },
+    "lineart": {
+      "rect": [
+        265.0,
+        211.0,
+        425.0,
+        395.0
+      ],
+      "fit": "contain_center"
+    },
+    "barcode": {
+      "bars_rect": [
+        458.2,
+        249.6,
+        519.4,
+        404.2
+      ],
+      "text_fontsize": 17.0,
+      "font": "barcode_hri",
+      "hri_grouping": "golden_1_6_6",
+      "hri_layout": "module_groups",
+      "digits_side": "right",
+      "reading": "bottom_to_top",
+      "readout_origin": [
+        523.8,
+        419.9
+      ],
+      "readout_xscale": 0.895,
+      "readout_gap": 0.4,
+      "character_spacing": 1.96,
+      "first_digit_height": 10.0,
+      "first_digit_offset": 16.0,
+      "main_group_gap": 8.55,
+      "main_bottom_inset": 5.65,
+      "main_top_inset": 6.0,
+      "regular_bar_inset": 9.8
+    }
+  },
+  "side": {
+    "base_page": 1,
+    "item_no": {
+      "bar_rect": [
+        18.1,
+        18.5,
+        549.4,
+        199.2
+      ],
+      "x0": 21.6,
+      "baseline_y": 181.3,
+      "max_width": 525.0,
+      "fontsize": 166.3,
+      "font": "latin_bold",
+      "color": [
+        1,
+        1,
+        1
+      ],
+      "fit": "center_in_bar"
+    },
+    "qty": {
+      "rect": [
+        97.0,
+        250.0,
+        179.0,
+        315.0
+      ],
+      "baseline_y": 299.6,
+      "fontsize": 53.9,
+      "font": "latin_bold",
+      "fit": "shrink_center"
+    },
+    "es_name": {
+      "prefix": "ES.",
+      "rect": [
+        327.1,
+        216.0,
+        449.1,
+        272.0
+      ],
+      "leading_ratio": 1.0,
+      "fontsize": 20.5,
+      "preferred_max_lines": 2,
+      "max_lines": 4,
+      "font": "latin_bold",
+      "fit": "balanced_wrap_no_hscale",
+      "min_fontsize": 12.0
+    },
+    "barcode": {
+      "bars_rect": [
+        472.9,
+        253.3,
+        534.1,
+        407.9
+      ],
+      "text_fontsize": 17.0,
+      "font": "barcode_hri",
+      "hri_grouping": "golden_1_6_6",
+      "hri_layout": "module_groups",
+      "digits_side": "right",
+      "reading": "bottom_to_top",
+      "readout_origin": [
+        538.5,
+        423.6
+      ],
+      "readout_xscale": 0.895,
+      "readout_gap": 0.4,
+      "character_spacing": 1.96,
+      "first_digit_height": 10.0,
+      "first_digit_offset": 16.0,
+      "main_group_gap": 8.55,
+      "main_bottom_inset": 5.65,
+      "main_top_inset": 6.0,
+      "regular_bar_inset": 9.8
+    }
+  },
+  "route_b": {
+    "note": "Route B hook: all field coordinates are panel-local pt. When the factory supplies carton L/W/H, render each panel at target size by scaling sx=target_w/567, sy=target_h/468, apply (sx,sy) to every field rect/baseline and stamp base.pdf via show_pdf_page into the scaled rect (non-uniform scale supported)."
+  }
+}

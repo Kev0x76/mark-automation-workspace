@@ -1,0 +1,641 @@
+{
+  "schema_version": "1.0.0",
+  "policy_id": "kmt_adaptive_v1",
+  "units": "pt",
+  "coordinate_system": "panel-local, origin top-left, y down",
+  "derives_from": {
+    "template": "template.json",
+    "base_artwork": "base.pdf",
+    "note": "template.json and base.pdf are read-only inputs. The standard-family regions are derived from template.json at runtime so the two can never drift; only the reflow families and tunable policy live here."
+  },
+  "provenance": {
+    "component_clips": "measured from base.pdf by clustering its vector draw ops (tools/build_adaptive_layout.py --verify)",
+    "reflow_families": "measured from 20 real factory mark pages (one SKU per page, each stating its carton L/W/H) plus 5 factory dieline references supplied by the project owner 2026-07-29",
+    "aspect_band_evidence": "standard layout observed at face aspect 0.93-2.36; reflowed layout observed at 2.62-3.68; no factory sample exists between 2.36 and 2.62"
+  },
+  "components": {
+    "front": {
+      "item_no_bar": {
+        "clip": [
+          17.6,
+          18.5,
+          548.9,
+          199.2
+        ],
+        "fit": "stretch",
+        "reason": "solid black rectangle; non-uniform scale is visually lossless"
+      },
+      "kmt_logo": {
+        "clip": [
+          20.3,
+          210.9,
+          235.3,
+          259.0
+        ],
+        "fit": "uniform"
+      },
+      "barcode_brackets": {
+        "clip": [
+          446.7,
+          234.9,
+          532.7,
+          424.2
+        ],
+        "fit": "uniform"
+      },
+      "icon_row": {
+        "clip": [
+          25.2,
+          402.0,
+          332.0,
+          436.9
+        ],
+        "fit": "uniform"
+      },
+      "origin_text": {
+        "clip": [
+          25.1,
+          381.0,
+          262.6,
+          398.5
+        ],
+        "fit": "uniform"
+      }
+    },
+    "side": {
+      "item_no_bar": {
+        "clip": [
+          18.1,
+          18.5,
+          549.4,
+          199.2
+        ],
+        "fit": "stretch",
+        "reason": "solid black rectangle"
+      },
+      "cell_qty": {
+        "clip": [
+          18.3,
+          211.8,
+          241.2,
+          340.3
+        ],
+        "fit": "stretch_x",
+        "reason": "label block + value frame; the label is a fixed-width black box, the value frame may widen"
+      },
+      "cell_meas": {
+        "clip": [
+          18.3,
+          352.9,
+          241.1,
+          436.7
+        ],
+        "fit": "stretch_x"
+      },
+      "cell_name": {
+        "clip": [
+          252.6,
+          210.9,
+          451.8,
+          277.0
+        ],
+        "fit": "stretch_x"
+      },
+      "cell_nw": {
+        "clip": [
+          252.6,
+          287.0,
+          451.8,
+          357.7
+        ],
+        "fit": "stretch_x"
+      },
+      "cell_gw": {
+        "clip": [
+          252.6,
+          365.7,
+          451.8,
+          436.3
+        ],
+        "fit": "stretch_x"
+      },
+      "barcode_brackets": {
+        "clip": [
+          464.0,
+          238.6,
+          550.0,
+          424.2
+        ],
+        "fit": "uniform"
+      }
+    }
+  },
+  "side_table": {
+    "row_heights": "reference",
+    "row_heights_choices": [
+      "reference",
+      "artwork"
+    ],
+    "row_heights_note": "Which statement decides the five drawn row heights on the cell_stack family (side_rows; side_bar_left also used cell_stack until 2026-09-29 and now draws the two-column cell_grid). 'reference' follows the factory reference 世荣.pdf - cell_qty taller, the other four equal - which is the delivered behaviour and the default. 'artwork' follows base.pdf's own five tiles: each cell is drawn at its own source height at the frame scale, giving Q.TY : others = 1.765 with a 1.268 spread across the other four, which is what the template happened to produce. Both are kept: 'reference' is the reading taken from the factory mark, 'artwork' is the template's own proportions, and which one production should ship is not settled by measurement alone. Only the drawn numbers change - the region band and the owner's order are the same either way. See the round docs/rounds/20260917-003-side-table-row-ratio.md.",
+    "qty_row_ratio": 1.489,
+    "qty_row_ratio_min": 1.4886,
+    "qty_row_ratio_max": 1.4926,
+    "other_rows_equal": true,
+    "spread_max": 0.0025,
+    "rule": "the cell_stack band is apportioned by weight - cell_qty qty_row_ratio units, the other four one unit each - and each cell is drawn to fill its slot, so the drawn row heights are exactly Q.TY : others = qty_row_ratio : 1 with the others equal. This is the row_heights='reference' path; row_heights='artwork' ignores qty_row_ratio and cuts the band evenly, letting each tile size itself",
+    "evidence": "Measured on the factory reference 世荣.pdf, all 20 pages x 2 side faces (40 faces). In the single-column five-cell form (12 faces: p5, p13-p17, aspect h/w 0.784-1.070) Q.TY / mean(other four) = 1.4886, 1.4887, 1.4889, 1.4900, 1.4902, 1.4922, 1.4926 twice each (the two side faces of a page repeat), and max/min of the other four rows <= 1.0025 on every face - i.e. equal to within +-0.15 pt, which is the drawing's own quantisation. The ratio is a row-span, not a constant: the same file shows 2.1637 (three-column form, 6 faces) and 2.1667-2.1694 (two-column form, 16 faces) and 1.8219-1.8245 (two-column, uneven row counts, 4 faces), because Q.TY spans N row heights there. 1.489 is the value for the five rows in one column, which is what side_rows and side_bar_left draw.",
+    "measured_by": "tools/measure_factory_side_table.py",
+    "see_also": "docs/side-mark-reference-study-20260917.md",
+    "note": "Drawing each tile at its own source height (128.5 / 66.1 / 83.8 / 70.7 / 70.6 pt) gives 1.765 with a 1.268 spread across the other four, which is what the template happened to produce. Apportioning the slots by qty_row_ratio reproduces the reference's 1.489 and flat instead. The layout_audit info_cells group was written for the flat reading; it now accepts a declared taller Q.TY row when the placement geometry shows that shape, and still reports an unstructured spread.",
+    "mechanism": "Q.TY's height is a row span, not a constant: same-column rows give 1.489 (this block), two/three-column forms give 2.167/2.164 and a two-column uneven-row form gives 1.822, because Q.TY spans N row heights there. Only side_rows and side_bar_left draw five rows in one column, so 1.489 applies to them. side_owner_grid puts the five cells in two columns and does not go through cell_stack, so it is unaffected and still draws the tiles' own heights (1.765 ratio, 1.268 spread).",
+    "label_block": "template_share",
+    "label_block_choices": [
+      "template_share",
+      "fixed"
+    ],
+    "label_word": "block_share",
+    "label_word_choices": [
+      "block_share",
+      "fixed"
+    ],
+    "label_word_max_row_share": 0.5,
+    "label_note": "Owner 2026-09-29 (factory photos 507021, 557962, 556102 + '黑框框就一点点', 'QTY等标志也可以跟着变大', '单位和品名装箱数这些一起放大，这些字符一起定个规则'; approved '可以，就按这样来'). label_block='template_share': a widened cell keeps its black label block at base.pdf's own share of the cell width (0.335-0.343; factory photos 0.33-0.37) - only the black columns beside the word widen (atlas.measure_label_padding). 'fixed' is the drawing before 2026-09-29 (block at the tile scale, only the white interior widens, block ~0.12 of the cell). label_word='block_share': per cell, every word - label, unit (PCS/cm/kg), Q.TY digits, NAME value - grows by one factor g >= 1 set by the label word: the label keeps its base.pdf share of the block width (0.55-0.78; factory 0.54-0.79) and no word is taller than label_word_max_row_share of its row (base.pdf 0.32-0.38; factory 0.30-0.36; 0.5 is the owner's 'can be bigger', not a factory value). Per cell, not one factor for the table: kg is already 0.42 of its row in base.pdf and would hold every label to 1.2x. A long NAME wraps/shrinks by its own rules. 'fixed' keeps every word at the tile scale."
+  },
+  "inset": {
+    "rule": "ratio_of_panel_height_with_bounds",
+    "ratio": 0.0376,
+    "min_mm": 5.0,
+    "max_mm": 10.0,
+    "evidence": "template.json uses 6.21 mm on a 165.1 mm panel (3.76%); factory files measured 7.5 mm on 95 mm panels and 10.0 mm on 135-305 mm panels",
+    "note": "This is the design inset - where the engine places content. It is not the printability limit; see safe_area below. The ratio reproduces template.json exactly at the template's own panel height."
+  },
+  "safe_area": {
+    "margin_mm": 2.0,
+    "rule": "hard printability limit measured from the panel edge",
+    "evidence": "project owner set 2 mm default printable safe margin per face (main handoff sections 16.1 and 35.1)",
+    "note": "Kept separate from the design inset on purpose. Some approved Kmt Style v1 artwork (the side barcode brackets) sits a fraction of a point outside the symmetric design box, so validating against the design box would reject today's own mark."
+  },
+  "scale": {
+    "rule": "panel_height_ratio",
+    "reference_content_height": 431.0,
+    "evidence": "factory product-name text measured at a near-constant 4.9-5.6% of panel height across panel heights 95-305 mm, so the mark scales with face height, not with area or width"
+  },
+  "families": {
+    "front_standard": {
+      "applies_when": {
+        "aspect_max": 1.4426
+      },
+      "source": "derived_from_template_json",
+      "anchors": {
+        "item_no_bar": "content_full_width",
+        "kmt_logo": "left",
+        "names": "left",
+        "lineart": "center",
+        "barcode": "right",
+        "origin_text": "left",
+        "icon_row": "left"
+      },
+      "band_evidence": "R1 2026-09-16: boundary = geometric mean of the two nearest owner anchors confirmed with different structures (owner-structures-20260915.json); provisional until the owner checks the round-2 anchors; owner anchor 1.00 keeps this structure"
+    },
+    "front_wide_band": {
+      "applies_when": {
+        "aspect_min": 2.8999
+      },
+      "top_band_h": 0.5,
+      "regions": {
+        "item_no_bar": {
+          "x": [
+            0.0,
+            0.74
+          ],
+          "y": [
+            0.0,
+            0.6
+          ]
+        },
+        "lineart": {
+          "x": [
+            0.77,
+            1.0
+          ],
+          "y": [
+            0.02,
+            0.55
+          ]
+        },
+        "kmt_logo": {
+          "x": [
+            0.0,
+            0.3
+          ],
+          "y": [
+            0.62,
+            0.76
+          ]
+        },
+        "names": {
+          "x": [
+            0.36,
+            0.68
+          ],
+          "y": [
+            0.73,
+            1.0
+          ],
+          "fields": [
+            "it_name",
+            "es_name",
+            "en_name"
+          ]
+        },
+        "barcode": {
+          "x": [
+            0.72,
+            1.0
+          ],
+          "y": [
+            0.62,
+            1.0
+          ],
+          "rotation_deg": 0
+        },
+        "cn_name": {
+          "x": [
+            0.36,
+            0.68
+          ],
+          "y": [
+            0.62,
+            0.71
+          ]
+        },
+        "origin_text": {
+          "x": [
+            0.0,
+            0.33
+          ],
+          "y": [
+            0.78,
+            0.84
+          ]
+        },
+        "icon_row": {
+          "x": [
+            0.0,
+            0.35
+          ],
+          "y": [
+            0.86,
+            0.94
+          ]
+        }
+      },
+      "evidence": "observed on factory pages with face aspect 2.62, 3.21 and 3.68",
+      "band_evidence": "R1 2026-09-16: boundary = geometric mean of the two nearest owner anchors confirmed with different structures (owner-structures-20260915.json); provisional until the owner checks the round-2 anchors; owner anchor 3.21 keeps this structure"
+    },
+    "side_standard": {
+      "applies_when": {
+        "aspect_max": 2.5
+      },
+      "source": "derived_from_template_json",
+      "anchors": {
+        "item_no_bar": "content_full_width",
+        "table": "left",
+        "barcode": "right"
+      },
+      "band_evidence": "not selected since R1 2026-09-16: side_owner_grid, the owner's widened version of this table, covers its band"
+    },
+    "side_compressed": {
+      "applies_when": {
+        "aspect_min": 2.1712,
+        "aspect_max": 2.8999
+      },
+      "barcode_column_w": 0.12,
+      "regions": {
+        "item_no_bar": {
+          "x": [
+            0.0,
+            0.88
+          ],
+          "y": [
+            0.0,
+            0.5
+          ]
+        },
+        "barcode": {
+          "x": [
+            0.88,
+            1.0
+          ],
+          "y": [
+            0.0,
+            1.0
+          ],
+          "rotation_deg": 90
+        },
+        "cell_qty": {
+          "x": [
+            0.0,
+            0.3
+          ],
+          "y": [
+            0.58,
+            1.0
+          ],
+          "rowspan": 2
+        },
+        "cell_name": {
+          "x": [
+            0.32,
+            0.66
+          ],
+          "y": [
+            0.58,
+            0.78
+          ]
+        },
+        "cell_meas": {
+          "x": [
+            0.32,
+            0.66
+          ],
+          "y": [
+            0.8,
+            1.0
+          ]
+        },
+        "cell_nw": {
+          "x": [
+            0.68,
+            0.88
+          ],
+          "y": [
+            0.58,
+            0.78
+          ]
+        },
+        "cell_gw": {
+          "x": [
+            0.68,
+            0.88
+          ],
+          "y": [
+            0.8,
+            1.0
+          ]
+        }
+      },
+      "evidence": "measured on the factory 305x95 mm side panel: bar and table share the left 88%, vertical barcode holds the right 12% at full height, and the five stacked rows regroup into three columns",
+      "band_evidence": "R1 2026-09-16: boundary = geometric mean of the two nearest owner anchors confirmed with different structures (owner-structures-20260915.json); provisional until the owner checks the round-2 anchors; owner anchor 2.62 keeps this structure"
+    },
+    "front_three_column": {
+      "applies_when": {
+        "aspect_min": 1.4426,
+        "aspect_max": 2.8999
+      },
+      "band_evidence": "R1 2026-09-16: boundary = geometric mean of the two nearest owner anchors confirmed with different structures (owner-structures-20260915.json); provisional until the owner checks the round-2 anchors",
+      "source": "owner anchors 2.08 (38.5x26.5x18.5 cm) and 2.62 (27.5x27.5x10.5 cm), 2026-09-15",
+      "evidence": "both anchors confirmed the same structure: full-width item-number bar on top; below it logo over the names block | line art | horizontal barcode over origin and icons, each element filling its own region (owner: 满版). Regions average the two anchors' dragged boxes, which fix order and adjacency, not coordinates",
+      "regions": {
+        "item_no_bar": {
+          "x": [
+            0.0,
+            1.0
+          ],
+          "y": [
+            0.0,
+            0.43
+          ]
+        },
+        "kmt_logo": {
+          "x": [
+            0.0,
+            0.34
+          ],
+          "y": [
+            0.47,
+            0.62
+          ]
+        },
+        "names": {
+          "x": [
+            0.0,
+            0.39
+          ],
+          "y": [
+            0.65,
+            1.0
+          ],
+          "fields": [
+            "cn_name",
+            "it_name",
+            "es_name",
+            "en_name"
+          ]
+        },
+        "lineart": {
+          "x": [
+            0.43,
+            0.64
+          ],
+          "y": [
+            0.49,
+            0.96
+          ]
+        },
+        "barcode": {
+          "x": [
+            0.68,
+            1.0
+          ],
+          "y": [
+            0.47,
+            0.8
+          ],
+          "rotation_deg": 0
+        },
+        "origin_text": {
+          "x": [
+            0.68,
+            1.0
+          ],
+          "y": [
+            0.82,
+            0.87
+          ]
+        },
+        "icon_row": {
+          "x": [
+            0.68,
+            1.0
+          ],
+          "y": [
+            0.9,
+            1.0
+          ]
+        }
+      }
+    },
+    "side_owner_grid": {
+      "applies_when": {
+        "aspect_min": 0.6928,
+        "aspect_max": 2.1712
+      },
+      "band_evidence": "R1 2026-09-16: boundary = geometric mean of the two nearest owner anchors confirmed with different structures (owner-structures-20260915.json); provisional until the owner checks the round-2 anchors; owner anchors 1.00, 1.43, 1.80 confirmed this structure",
+      "source": "owner_rules.OWNER_SIDE_COLUMNS (built by build_side_owner_grid)"
+    },
+    "side_rows": {
+      "applies_when": {
+        "aspect_max": 0.6928
+      },
+      "band_evidence": "R1 2026-09-16: boundary = geometric mean of the two nearest owner anchors confirmed with different structures (owner-structures-20260915.json); provisional until the owner checks the round-2 anchors",
+      "source": "owner 2026-09-29 (factory photo 517393 + owner choice B); replaces the owner anchor 1.00 side (120x250 mm) of 2026-09-15",
+      "evidence": "owner 2026-09-29: current side_rows '都不行'; follow photo 517393 (31x17.5x49 cm, side 175x490: bar 0.18 / table 0.56 / barcode 0.14 of the face height, table 0.75 of the width) but '信息部分的方框太短了和货号相比' -> table as wide as the bar; chose B (barcode about 0.7 of the width), then '条码等比例缩小一点' -> barcode band 0.20. Row order as the photo: Q.TY, MEAS, NAME, N.W., G.W. Earlier (2026-09-15): bar 0.27, order Q.TY, NAME, MEAS, N.W., G.W.",
+      "regions": {
+        "item_no_bar": {
+          "x": [
+            0.0,
+            1.0
+          ],
+          "y": [
+            0.0,
+            0.18
+          ]
+        },
+        "barcode": {
+          "x": [
+            0.0,
+            1.0
+          ],
+          "y": [
+            0.8,
+            1.0
+          ],
+          "rotation_deg": 0
+        },
+        "cell_stack": {
+          "x": [
+            0.0,
+            1.0
+          ],
+          "y": [
+            0.21,
+            0.76
+          ],
+          "gap": 0.02,
+          "order": [
+            "cell_qty",
+            "cell_meas",
+            "cell_name",
+            "cell_nw",
+            "cell_gw"
+          ],
+          "note": "slots apportioned by side_table.qty_row_ratio (cell_qty taller, others equal) and used as ceilings; each cell is drawn at its own tile height at the frame scale, so the stack stays inside its band"
+        }
+      }
+    },
+    "side_bar_left": {
+      "applies_when": {
+        "aspect_min": 2.8999
+      },
+      "band_evidence": "R1 2026-09-16: boundary = geometric mean of the two nearest owner anchors confirmed with different structures (owner-structures-20260915.json); provisional until the owner checks the round-2 anchors",
+      "source": "owner 2026-09-29; replaces the owner anchor 3.21 side (305x95 mm) of 2026-09-15",
+      "evidence": "owner 2026-09-29: the 2026-09-15 structure (bar left, five cells in one column, vertical barcode right) and a full-width bar over a two-column table are both '不行'; '改为左右布局，左侧货号，右侧信息加条码（上下结构）'. Item-number bar on the left half, on the right the factory's two-column table (Q.TY over MEAS | NAME, N.W., G.W.; photos 501174, 507021, 557962) over a horizontal barcode. Approved on the rendered 305x305x95 sheet.",
+      "regions": {
+        "item_no_bar": {
+          "x": [
+            0.0,
+            0.5
+          ],
+          "y": [
+            0.0,
+            1.0
+          ]
+        },
+        "barcode": {
+          "x": [
+            0.53,
+            1.0
+          ],
+          "y": [
+            0.71,
+            1.0
+          ],
+          "rotation_deg": 0
+        },
+        "cell_grid": {
+          "x": [
+            0.53,
+            1.0
+          ],
+          "y": [
+            0.0,
+            0.66
+          ],
+          "column_gap": 0.02,
+          "columns": [
+            [
+              "cell_qty",
+              "cell_meas"
+            ],
+            [
+              "cell_name",
+              "cell_nw",
+              "cell_gw"
+            ]
+          ],
+          "note": "columns side by side; column widths from the template's own columns; vertically base.pdf's own table (cell positions, heights and row gaps) scaled by one factor to the band (families._cell_grid_slots)"
+        }
+      }
+    }
+  },
+  "constraints": {
+    "min_font_mm": {
+      "item_no": 6.0,
+      "cn_name": 2.2,
+      "latin_name": 2.0,
+      "table_value": 2.0,
+      "origin_text": 1.8
+    },
+    "barcode": {
+      "lock_aspect": true,
+      "nominal_x_dimension_mm": 0.33,
+      "warn_below_x_mm": 0.495,
+      "fail_below_x_mm": 0.264,
+      "max_x_mm": null,
+      "max_x_note": "UNCAPPED BY OWNER DECISION 2026-08-26. max_x_mm is null, so the symbol scales with its layout slot without an upper bound. What the cap used to do: GS1 General Specifications put the EAN/UPC magnification ceiling at 200% (X = 0.660 mm) because a scan must cross the whole symbol plus both quiet zones in one pass, and an oversized symbol can exceed the scanner's field of view - it is a read limit, not a print limit. Removing the cap does NOT make the symbol unbounded: it now fills whatever slot the layout family gives it, so the ceiling moved from the specification to the page. For reference, the uncapped sweep that originally motivated the cap reached X = 3.917 mm (1187%) on a 1300 mm face and 1.540 mm (467%) on the 900 mm trolley carton. Exceeding warn_above_x_mm is now reported as a non-blocking diagnostic (barcode_above_gs1_ceiling) instead of being silently shrunk. Physical scan verification on a printed sample is the only thing that can confirm a large symbol still reads.",
+      "quiet_zone_leading_x": 11,
+      "quiet_zone_trailing_x": 7,
+      "allowed_rotation_deg": [
+        0,
+        90
+      ],
+      "source": "GS1 General Specifications: nominal X 0.330 mm; retail POS 80-200% (0.264-0.660 mm); general distribution 150-200% (0.495-0.660 mm)",
+      "template_x_dimension_mm": 0.574,
+      "template_magnification": 1.74,
+      "known_pre_existing_deviation": "the golden Kmt Style v1 artwork truncates bar height to about 54% of the GS1 nominal height for its magnification; this adaptive policy preserves that inherited proportion and does not worsen it, but it is not GS1-preferred and is reported as a diagnostic",
+      "warn_above_x_mm": 0.66,
+      "warn_above_note": "Reference only, not a cap. Field evidence that trade practice already exceeds it: the zhuhai 2026-08-14 sheet prints its side-face EAN-13 at X = 1.112 mm (337%), while the front face on the same sheet stays at 0.593 mm (180%). See docs/wide-face-column-layout-evidence-20260824.md."
+    },
+    "min_component_gap_mm": 1.5,
+    "require": [
+      "item_no",
+      "barcode",
+      "lineart",
+      "names",
+      "origin_text",
+      "icon_row"
+    ]
+  },
+  "scoring": {
+    "weights": {
+      "area_utilisation": 1.0,
+      "readability": 2.0,
+      "barcode_magnification": 2.5,
+      "alignment": 1.0,
+      "standard_similarity": 1.5
+    },
+    "auto_select_margin": 0.08,
+    "note": "auto_select_margin is the score gap the winner must beat the runner-up by; below it the plan is marked needs_review instead of auto_selected"
+  }
+}

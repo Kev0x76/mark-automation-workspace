@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "items.normalized.json",
+  "type": "object",
+  "required": ["project_id", "items"],
+  "properties": {
+    "project_id": { "type": "string", "minLength": 1 },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "item_no",
+          "barcode",
+          "cn_name",
+          "it_name",
+          "es_name",
+          "en_name",
+          "qty",
+          "source_image",
+          "source_image_status",
+          "product_region_status",
+          "selected_product_region",
+          "lineart_status",
+          "lineart_asset"
+        ],
+        "properties": {
+          "item_no": { "type": "string", "minLength": 1 },
+          "barcode": { "type": "string", "pattern": "^[0-9]{13}$" },
+          "cn_name": { "type": "string" },
+          "it_name": { "type": "string" },
+          "es_name": { "type": "string" },
+          "en_name": { "type": "string" },
+          "qty": { "type": ["number", "integer"] },
+          "source_image": { "type": ["string", "null"] },
+          "source_image_status": {
+            "type": "string",
+            "enum": ["matched", "missing", "unmatched"]
+          },
+          "product_region_status": {
+            "type": "string",
+            "enum": ["missing", "selected", "needs_review", "rejected"]
+          },
+          "selected_product_region": {
+            "type": ["object", "null"],
+            "properties": {
+              "candidate_id": { "type": "string" },
+              "image_path": { "type": "string" },
+              "cutout_path": { "type": "string" },
+              "mask_path": { "type": ["string", "null"] },
+              "mask_semantics": {
+                "type": "string",
+                "enum": ["foreground_evidence", "product_foreground"]
+              },
+              "text_mask_path": { "type": ["string", "null"] },
+              "text_mask_sha256": {
+                "type": ["string", "null"],
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "ocr_status": {
+                "type": ["string", "null"],
+                "enum": ["success", "failed", "unavailable", null]
+              },
+              "text_regions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "polygon": {
+                      "type": "array",
+                      "items": {
+                        "type": "array",
+                        "items": { "type": "number" },
+                        "minItems": 2,
+                        "maxItems": 2
+                      },
+                      "minItems": 4
+                    },
+                    "bbox": {
+                      "type": "object",
+                      "required": ["x", "y", "width", "height"],
+                      "properties": {
+                        "x": { "type": "integer", "minimum": 0 },
+                        "y": { "type": "integer", "minimum": 0 },
+                        "width": { "type": "integer", "minimum": 1 },
+                        "height": { "type": "integer", "minimum": 1 }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "identity_status": {
+                "type": "string",
+                "enum": ["matched", "mismatch", "unknown"]
+              },
+              "source_sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+              "crop_sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+              "cutout_sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+              "mask_sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+              "region_artifact_id": {
+                "type": ["string", "null"],
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "score": { "type": "number" },
+              "confidence": { "type": "string", "enum": ["high", "low"] },
+              "algorithm_version": { "type": "string" },
+              "selected_by": { "type": "string", "enum": ["automatic", "manual", "manual_crop"] },
+              "selected_at": { "type": "string" },
+              "selection_audit": {
+                "type": "object",
+                "required": ["reviewer", "reason", "normalized_bbox", "created_at"],
+                "properties": {
+                  "reviewer": { "type": "string", "minLength": 1 },
+                  "reason": { "type": "string", "minLength": 1 },
+                  "normalized_bbox": {
+                    "type": "object",
+                    "required": ["x", "y", "width", "height"],
+                    "properties": {
+                      "x": { "type": "number", "minimum": 0, "maximum": 1 },
+                      "y": { "type": "number", "minimum": 0, "maximum": 1 },
+                      "width": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+                      "height": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 }
+                    },
+                    "additionalProperties": false
+                  },
+                  "created_at": { "type": "string" }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          },
+          "lineart_status": {
+            "type": "string",
+            "enum": ["missing", "pending", "uploaded", "approved", "rejected", "stale"]
+          },
+          "lineart_asset": { "type": ["string", "null"] },
+          "previous_lineart_asset": { "type": ["string", "null"] },
+          "lineart_qc_status": {
+            "type": "string",
+            "enum": ["missing", "passed", "accepted", "human_passed", "needs_review"]
+          },
+          "lineart_stale_reason": { "type": ["string", "null"] },
+          "lineart_provenance": {
+            "type": ["object", "null"],
+            "properties": {
+              "item_no": { "type": ["string", "null"] },
+              "candidate_id": { "type": ["string", "null"] },
+              "region_artifact_id": {
+                "type": ["string", "null"],
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "source_sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+              "cutout_sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+              "mask_sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+              "candidate_sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+              "approved_sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+              "candidate_path": { "type": ["string", "null"] },
+              "approved_path": { "type": ["string", "null"] },
+              "provider": { "type": ["string", "null"] },
+              "algorithm_version": { "type": ["string", "null"] },
+              "quality": { "type": ["object", "null"] }
+            },
+            "additionalProperties": true
+          }
+        }
+      }
+    }
+  }
+}
